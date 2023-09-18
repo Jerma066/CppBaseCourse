@@ -1,3 +1,15 @@
+CXX=g++
+CXXFLAGS= -std=c++1z
+
+all:
+	$(CXX) $(CXXFLAGS) main.cpp -o main
+
+unit_tests:
+	$(CXX) $(CXXFLAGS) unit_tests.cpp -lgtest -o unit_tests
+	./unit_tests
+	mrm unit_tests
+
+
 # --- Should be used with sudo ------------------------------------------------
 install_gtest:
 	mkdir ../googletest/build
@@ -9,11 +21,3 @@ uninstall_gtest:
 	make clean -C ../googletest/build
 	rm -rf ../googletest/build
 # -----------------------------------------------------------------------------
-
-CXX=g++
-CXXFLAGS= -std=c++1z
-
-unit_tests:
-	$(CXX) $(CXXFLAGS) unit_tests.cpp -lgtest -o unit_tests
-	./unit_tests
-	rm unit_tests

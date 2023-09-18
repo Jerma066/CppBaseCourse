@@ -1,0 +1,3 @@
+LFU cache hit rate: 1
+Belady score: 2
+Belady's adnvantage: 1

@@ -1,0 +1,3 @@
+LFU cache hit rate: 7
+Belady score: 7
+Hit rates are equal
