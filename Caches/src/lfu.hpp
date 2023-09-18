@@ -1,3 +1,5 @@
+#pragma once
+
 #include <list>
 #include <stdlib.h>
 #include <unordered_map>
@@ -61,4 +63,4 @@ private:
   std::unordered_map<size_t, std::list<Elem>> freqToElems;
 };
 
-} // end of caches namspace
+} // end of caches namespace
