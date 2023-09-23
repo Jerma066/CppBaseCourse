@@ -15,6 +15,12 @@ public:
     currentStateWasChanged(false) {}
   
 public:
+  std::vector<size_t> getSortedCacheIDs() {
+    std::vector<size_t> cacheIDs = std::vector(cache.begin(), cache.end());
+    std::sort(cacheIDs.begin(), cacheIDs.end());
+    return cacheIDs;
+  }
+
   void addToStatistics(size_t id){
     inputData.push_back(id);
     currentStateWasChanged = true;
@@ -27,9 +33,9 @@ public:
       beladyRemoteness.clear();
 
       for (size_t i = 0, end = inputData.size(); i < end; i++) {
+        UpdateCacheElements(i);
         if (lookup(inputData[i], i))
           hc_++;
-        UpdateCacheElements(i);
       }
     }
 
@@ -40,8 +46,12 @@ private:
   void UpdateCacheElements(size_t pos) {
     std::map<int, std::unordered_set<size_t>::iterator> newBeladyRemoteness;
     for (auto it = cache.begin(); it != cache.end(); it++) {
-      auto nextItemEntry = std::find(inputData.begin() + pos, inputData.end(), *it);
-      size_t distance = nextItemEntry - inputData.begin() - pos;
+      // TODO: Algorithm can be improved with counting distances as
+      //       distance = oldDistance - 1, where oldDistance != 0;
+
+      auto nextItemEntry =
+        std::find(inputData.begin() + pos + 1, inputData.end(), *it);
+      size_t distance = nextItemEntry - (inputData.begin() + pos);
       newBeladyRemoteness[distance] = it;
     }
 
@@ -62,8 +72,9 @@ private:
 
   bool lookup(const size_t id, const size_t pos) {
     if (cache.find(id) == cache.end()) {
-      auto nextIdEntry = std::find(inputData.begin() + pos, inputData.end(), id);
-      auto distance = nextIdEntry - inputData.begin();
+      auto nextIdEntry =
+        std::find(inputData.begin() + pos + 1, inputData.end(), id);
+      auto distance = nextIdEntry - (inputData.begin() + pos);
       if (cache.size() == sz_) {
         auto mostRemoteDist = beladyRemoteness.rbegin()->first;
         if (distance < mostRemoteDist) {
@@ -92,4 +103,4 @@ private:
   std::map<int, std::unordered_set<size_t>::iterator> beladyRemoteness;
 };
 
-} // end of caches namespace
+} // caches

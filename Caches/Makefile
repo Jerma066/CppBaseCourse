@@ -1,8 +1,11 @@
 CXX=g++
-CXXFLAGS= -std=c++1z
+CXXFLAGS= -std=c++1z -O2
 
 all:
 	$(CXX) $(CXXFLAGS) main.cpp -o main
+
+debug:
+	$(CXX) main.cpp -g -o main
 
 unit_tests:
 	$(CXX) $(CXXFLAGS) unit_tests.cpp -lgtest -o unit_tests

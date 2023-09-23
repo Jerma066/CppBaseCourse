@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ostream>
 #include <list>
 #include <stdlib.h>
 #include <unordered_map>
@@ -11,6 +12,17 @@ public:
   explicit LFU(size_t size): sz_(size), minFreq(0) {}
 
 public:
+  void dump(std::ostream& OS) {
+    OS << "LFU {id: fr}: {";
+    bool firstElem = true;
+    for (auto it = idToElem.begin(), end = idToElem.end(); it != end; ++it) {
+      std::string sep = firstElem ? "" : ", ";
+      OS << sep << it->second->id << ":" << it->second->freq;
+      firstElem = false;
+    }
+    OS << "}";
+  }
+
   bool lookup(size_t id) {
     auto elemIt = idToElem.find(id);    
     if (elemIt == idToElem.end()) {
@@ -63,4 +75,4 @@ private:
   std::unordered_map<size_t, std::list<Elem>> freqToElems;
 };
 
-} // end of caches namespace
+} // caches

@@ -77,6 +77,46 @@ TEST(BeladyScore, FourPossibleHits) {
   bscore.addToStatistics(5);
   EXPECT_EQ(4, bscore.getHitCount());
 }
+
+TEST(BeladyScore, UniqueElementMiss) {
+  caches::BeladyScore bscore(5);
+
+  // Creating sequence: 0, 1, 2, 3, 4
+  for (size_t i = 1; i < 6; i++)
+    bscore.addToStatistics(i);
+  bscore.addToStatistics(8);
+  EXPECT_EQ(0, bscore.getHitCount());
+
+  // Creating sequence: 0, 1, 2, 3, 4, 8, {0,1,2,3,4}...
+  for (size_t i = 1; i < 101; i++)
+    bscore.addToStatistics(1 % 5);
+  EXPECT_EQ(100, bscore.getHitCount());
+  std::vector<size_t> goldenCache = {1, 2, 3, 4, 5};
+  EXPECT_EQ(bscore.getSortedCacheIDs(), goldenCache);
+}
+
+
+TEST(BeladyScore, MostRemoteElementMiss) {
+  caches::BeladyScore bscore(10);
+
+  for (size_t i = 0; i < 10; i++)
+    bscore.addToStatistics(i);
+  bscore.addToStatistics(13);
+  EXPECT_EQ(0, bscore.getHitCount());
+
+  size_t i = 0;
+  while (i < 100) {
+    for(size_t j = 0; j < 20; j++)
+      bscore.addToStatistics(j % 10);
+    size_t hitRate = bscore.getHitCount();
+    bscore.addToStatistics(13);
+    EXPECT_EQ(hitRate, bscore.getHitCount());
+    std::vector<size_t> goldenCache = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    EXPECT_EQ(bscore.getSortedCacheIDs(), goldenCache);
+    i += 20;
+  }
+}
+
 // ----------------------------------------------------------------------------
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
