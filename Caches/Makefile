@@ -10,7 +10,7 @@ debug:
 unit_tests:
 	$(CXX) $(CXXFLAGS) unit_tests.cpp -lgtest -o unit_tests
 	./unit_tests
-	mrm unit_tests
+	rm unit_tests
 
 
 # --- Should be used with sudo ------------------------------------------------

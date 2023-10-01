@@ -10,9 +10,7 @@ namespace caches {
 
 class BeladyScore {
 public: 
-  explicit BeladyScore(size_t size):
-    sz_(size), hc_(0),
-    currentStateWasChanged(false) {}
+  explicit BeladyScore(size_t size): sz_(size){}
   
 public:
   std::vector<size_t> getSortedCacheIDs() {
@@ -33,7 +31,14 @@ public:
       beladyRemoteness.clear();
 
       for (size_t i = 0, end = inputData.size(); i < end; i++) {
-        UpdateCacheElements(i);
+        // Update elements remotness only if cache is full.
+        // Otherwise elements will be just added to cache.
+        if (cache.size() == sz_) {
+          UpdateCacheElements(i);
+        } else {
+          distDecrCnt++;
+        }
+
         if (lookup(inputData[i], i))
           hc_++;
       }
@@ -45,17 +50,23 @@ public:
 private:
   void UpdateCacheElements(size_t pos) {
     std::map<int, std::unordered_set<size_t>::iterator> newBeladyRemoteness;
-    for (auto it = cache.begin(); it != cache.end(); it++) {
-      // TODO: Algorithm can be improved with counting distances as
-      //       distance = oldDistance - 1, where oldDistance != 0;
+    for (auto elem : beladyRemoteness) {
+      size_t distance = 0;
+      if (elem.first - distDecrCnt >= 0) {
+        // Common case: distances decrements
+        distance = elem.first - distDecrCnt;
+      } else {
+        // The elements that require new position search
+        auto nextItemEntry =
+          std::find(inputData.begin() + pos + 1, inputData.end(), *elem.second);
+        distance = nextItemEntry - (inputData.begin() + pos);
+      }
 
-      auto nextItemEntry =
-        std::find(inputData.begin() + pos + 1, inputData.end(), *it);
-      size_t distance = nextItemEntry - (inputData.begin() + pos);
-      newBeladyRemoteness[distance] = it;
+      newBeladyRemoteness[distance] = elem.second;
     }
 
     beladyRemoteness = newBeladyRemoteness;
+    distDecrCnt = 1;
   }
 
   void EraseMostRemoteElement() {
@@ -96,11 +107,12 @@ private:
   const size_t sz_;
   std::vector<size_t> inputData;
 
-  size_t hc_;
-  bool currentStateWasChanged;
-
   std::unordered_set<size_t> cache;
   std::map<int, std::unordered_set<size_t>::iterator> beladyRemoteness;
+
+  size_t hc_ = 0;
+  bool currentStateWasChanged = false;
+  int distDecrCnt = 1;
 };
 
 } // caches
