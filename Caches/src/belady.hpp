@@ -1,10 +1,12 @@
 #pragma once
 
-#include <stdlib.h>
-#include <vector>
-#include <map>
-#include <unordered_set>
 #include <algorithm>
+#include <map>
+#include <queue>
+#include <unordered_set>
+#include <vector>
+
+#include <iostream>
 
 namespace caches {
 
@@ -19,6 +21,18 @@ public:
     return cacheIDs;
   }
 
+  void dump(std::ostream &OS) {
+    OS << "Cache IDs: ";
+    for (auto elem : cache)
+      OS << elem << ' ';
+    OS << '\n';
+
+    OS << "Remotenes: ";
+    for (auto pair : beladyRemoteness)
+      OS << '{' << *pair.second << ';' << pair.first << "} ";
+    OS << std::endl;
+  }
+
   void addToStatistics(size_t id){
     inputData.push_back(id);
     currentStateWasChanged = true;
@@ -30,15 +44,11 @@ public:
       cache.clear();
       beladyRemoteness.clear();
 
-      for (size_t i = 0, end = inputData.size(); i < end; i++) {
-        // Update elements remotness only if cache is full.
-        // Otherwise elements will be just added to cache.
-        if (cache.size() == sz_) {
-          UpdateCacheElements(i);
-        } else {
-          distDecrCnt++;
-        }
+      // Initialize elements positions
+      for (size_t i = 0, end = inputData.size(); i < end; ++i)
+        elementsPositions[inputData[i]].push(i);
 
+      for (size_t i = 0, end = inputData.size(); i < end; ++i) {
         if (lookup(inputData[i], i))
           hc_++;
       }
@@ -48,67 +58,91 @@ public:
   }
 
 private:
-  void UpdateCacheElements(size_t pos) {
-    std::map<int, std::unordered_set<size_t>::iterator> newBeladyRemoteness;
-    for (auto elem : beladyRemoteness) {
-      size_t distance = 0;
-      if (elem.first - distDecrCnt >= 0) {
-        // Common case: distances decrements
-        distance = elem.first - distDecrCnt;
-      } else {
-        // The elements that require new position search
-        auto nextItemEntry =
-          std::find(inputData.begin() + pos + 1, inputData.end(), *elem.second);
-        distance = nextItemEntry - (inputData.begin() + pos);
-      }
+  // TODO: Use std::optional instead of std::pair
+  std::pair<bool, size_t> GetNextPositionOfElem(size_t pos, size_t elem) {
+    std::pair<bool, size_t> nextPos = {false, 0};
 
-      newBeladyRemoteness[distance] = elem.second;
+    auto it = elementsPositions.find(elem);
+    if (it != elementsPositions.end()) {
+      std::queue<size_t> &positions = it->second;
+      while (!positions.empty() && positions.front() <= pos)
+        positions.pop();
+
+      if (!positions.empty()) {
+        nextPos = {true, positions.front()};
+      } else {
+        elementsPositions.erase(it);
+      }
     }
 
+    return nextPos;
+  }
+
+  void UpdateCacheElements(size_t pos) {
+    std::map<size_t, std::unordered_set<size_t>::iterator> newBeladyRemoteness;
+    for (auto belRemElem : beladyRemoteness) {
+      std::pair<bool, size_t> nextPos =
+          GetNextPositionOfElem(pos, *belRemElem.second);
+
+      // Update position of element or remove element from cache
+      if (nextPos.first) {
+        newBeladyRemoteness[nextPos.second] = belRemElem.second;
+      } else {
+        cache.erase(cache.find(*belRemElem.second));
+      }
+    }
     beladyRemoteness = newBeladyRemoteness;
-    distDecrCnt = 1;
   }
 
   void EraseMostRemoteElement() {
     auto delIter = std::prev(beladyRemoteness.end());
-
     cache.erase(delIter->second);
-    beladyRemoteness.erase(delIter); 
+    beladyRemoteness.erase(delIter);
   }
 
-  void InsertElement(size_t id, int distance) {
+  void InsertElement(size_t id, size_t nextPosition) {
     auto [cacheIter, _] = cache.insert(id);
-    beladyRemoteness[distance] = cacheIter;
+    beladyRemoteness[nextPosition] = cacheIter;
   }
 
   bool lookup(const size_t id, const size_t pos) {
+    // Update elements remotness if cache is full.
+    // Otherwise elements will be just added to cache.
+
     if (cache.find(id) == cache.end()) {
-      auto nextIdEntry =
-        std::find(inputData.begin() + pos + 1, inputData.end(), id);
-      auto distance = nextIdEntry - (inputData.begin() + pos);
-      if (cache.size() == sz_) {
-        auto mostRemoteDist = beladyRemoteness.rbegin()->first;
-        if (distance < mostRemoteDist) {
-          EraseMostRemoteElement();
-          InsertElement(id, distance);
+      std::pair<bool, size_t> nextPos = GetNextPositionOfElem(pos, id);
+
+      if (nextPos.first && cache.size() == sz_)
+        UpdateCacheElements(pos);
+
+      // Insert Element only if it will appear in the future
+      if (nextPos.first) {
+        if (cache.size() == sz_) {
+          // Next position of curent elem is less than next position of
+          // most remote element in cache
+          if (nextPos.second < beladyRemoteness.rbegin()->first) {
+            EraseMostRemoteElement();
+            InsertElement(id, nextPos.second);
+          } else if (beladyRemoteness.empty()) {
+            InsertElement(id, nextPos.second);
+          }
+        } else {
+          InsertElement(id, nextPos.second);
         }
-      } else {
-        InsertElement(id, distance);
       }
 
       return false;
     }
 
-    return true; 
+    return true;
   }
-
 
 private:
   const size_t sz_;
   std::vector<size_t> inputData;
-
   std::unordered_set<size_t> cache;
-  std::map<int, std::unordered_set<size_t>::iterator> beladyRemoteness;
+  std::map<size_t, std::unordered_set<size_t>::iterator> beladyRemoteness;
+  std::unordered_map<size_t, std::queue<size_t>> elementsPositions;
 
   size_t hc_ = 0;
   bool currentStateWasChanged = false;

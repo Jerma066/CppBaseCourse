@@ -1,5 +1,5 @@
-#include "src/lfu.hpp"
-#include "src/belady.hpp"
+#include "lfu.hpp"
+#include "belady.hpp"
 
 #include <iostream>
 
@@ -25,7 +25,7 @@ int main() {
   std::cout << "Belady score: " << bhitsNum << "\n";
 
   if (bhitsNum > hitsNum) {
-    std::cout << "Belady's adnvantage: " << bhitsNum - hitsNum << std::endl;
+    std::cout << "Belady's advantage: " << bhitsNum - hitsNum << std::endl;
   } else if (bhitsNum < hitsNum) {
     std::cout << "LFU cache's advanage: " << hitsNum - bhitsNum << std::endl;
   } else {

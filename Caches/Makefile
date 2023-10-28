@@ -1,14 +1,15 @@
 CXX=g++
 CXXFLAGS= -std=c++1z -O2
+INC= -I ./src
 
 all:
-	$(CXX) $(CXXFLAGS) main.cpp -o main
+	$(CXX) $(CXXFLAGS) $(INC) main.cpp -o main
 
 debug:
-	$(CXX) main.cpp -g -o main
+	$(CXX) $(INC) main.cpp -g -o main
 
 unit_tests:
-	$(CXX) $(CXXFLAGS) unit_tests.cpp -lgtest -o unit_tests
+	$(CXX) $(CXXFLAGS) $(INC) ./test/unit_tests.cpp -lgtest -o unit_tests
 	./unit_tests
 	rm unit_tests
 

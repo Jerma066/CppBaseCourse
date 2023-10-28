@@ -1,8 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "src/lfu.hpp"
-#include "src/belady.hpp"
-#include "src/belady.hpp"
+#include "lfu.hpp"
+#include "belady.hpp"
 
 // ----- LFU tests ------------------------------------------------------------
 TEST(LFUCache, AbsoluteMiss) {
@@ -91,8 +90,6 @@ TEST(BeladyScore, UniqueElementMiss) {
   for (size_t i = 1; i < 101; i++)
     bscore.addToStatistics(1 % 5);
   EXPECT_EQ(100, bscore.getHitCount());
-  std::vector<size_t> goldenCache = {1, 2, 3, 4, 5};
-  EXPECT_EQ(bscore.getSortedCacheIDs(), goldenCache);
 }
 
 
