@@ -10,7 +10,7 @@
 
 namespace caches {
 
-class BeladyScore {
+class BeladyScore final {
 public: 
   explicit BeladyScore(size_t size): sz_(size){}
   

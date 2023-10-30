@@ -7,7 +7,7 @@
 
 namespace caches {
 
-class LFU {
+class LFU final {
 public:
   explicit LFU(size_t size): sz_(size), minFreq(0) {}
 
