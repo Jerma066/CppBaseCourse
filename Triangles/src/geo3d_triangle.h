@@ -6,8 +6,8 @@
 
 namespace geometry3D {
 
-struct Triangle {
-
+struct Triangle final {
+  Vector getNormalVector() const;
   bool isIntersect(const Triangle& tr) const;
 
   Point p1, p2, p3;

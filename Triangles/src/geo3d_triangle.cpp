@@ -3,6 +3,13 @@
 // Triangle methods
 namespace geometry3D {
 
+Vector Triangle::getNormalVector() const {
+  Vector vecP12(p1, p2);
+  Vector vecP23(p2, p3);
+  Vector normalVec = Vector::VectorProduct(vecP12, vecP23);
+  return normalVec.divideByScalar(normalVec.length());
+}
+
 bool Triangle::isIntersect(const Triangle& tr) const {
   // 1. Compute the normal vectors for each triangle.
 

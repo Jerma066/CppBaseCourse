@@ -5,8 +5,7 @@
 
 #include "geo3d_triangle.h"
 
-// ----- LFU tests ------------------------------------------------------------
-TEST(Geometry3D, PointCinCheck) {
+TEST(Geometry3DPoint, CinCheck) {
   std::string buf = "1 2 3";
   std::stringstream IOS(buf);
 
@@ -18,7 +17,7 @@ TEST(Geometry3D, PointCinCheck) {
   EXPECT_EQ(res, true);
 }
 
-TEST(Geometry3D, TriangleCinCheck) {
+TEST(Geometry3DTriangle, CinCheck) {
   std::string buf = "1 2 3 4 5 6 7 8 9";
   std::stringstream IOS(buf);
 
@@ -30,7 +29,7 @@ TEST(Geometry3D, TriangleCinCheck) {
   EXPECT_EQ(res, true);
 }
 
-TEST(Geometry3D, ScalarProduct) {
+TEST(Geometry3DVector, ScalarProduct) {
   geometry3D::Point from{0, 0, 0};
 
   geometry3D::Vector xAxis(from, {1, 0, 0});
@@ -48,7 +47,7 @@ TEST(Geometry3D, ScalarProduct) {
   EXPECT_EQ(res, expected);
 }
 
-TEST(Geometry3D, VectorProduct) {
+TEST(Geometry3DVector, VectorProduct) {
   geometry3D::Point from{0, 0, 0};
 
   geometry3D::Vector xAxis(from, {1, 0, 0});
@@ -62,6 +61,53 @@ TEST(Geometry3D, VectorProduct) {
   EXPECT_EQ(res, true);
 
   res = geometry3D::Vector::VectorProduct(zAxis, xAxis) == yAxis;
+  EXPECT_EQ(res, true);
+}
+
+TEST(Geometry3DVector, Length) {
+  float expected = 6;
+  {
+    geometry3D::Vector vec({4, 4, 2});
+    EXPECT_EQ(vec.length(), expected);
+  }
+
+  expected = 11;
+  {
+    geometry3D::Vector vec({9, 2, 6});
+    EXPECT_EQ(vec.length(), expected);
+  }
+
+  expected = 12;
+  {
+    geometry3D::Vector vec({4, 8, 8});
+    EXPECT_EQ(vec.length(), expected);
+  }
+}
+
+TEST(Geometry3DVector, DivideByScalar) {
+  {
+    geometry3D::Vector vec({4, 2, 4});
+    vec.divideByScalar(2);
+    EXPECT_EQ(vec.dir.x, 2);
+    EXPECT_EQ(vec.dir.y, 1);
+    EXPECT_EQ(vec.dir.z, 2);
+  }
+
+  {
+    geometry3D::Vector vec({6, 9, 2});
+    vec.divideByScalar(11);
+    EXPECT_EQ(vec.length(), 1);
+  }
+}
+
+TEST(Geometry3DTriangle, GetNormalVector) {
+  geometry3D::Point p1({0, 0, 0});
+  geometry3D::Point p2({3, 0, 0});
+  geometry3D::Point p3({0, 4, 0});
+  geometry3D::Triangle pifTr({p1, p2, p3});
+
+  geometry3D::Vector expectedNorm({0, 0, 1});
+  bool res = (pifTr.getNormalVector() == expectedNorm);
   EXPECT_EQ(res, true);
 }
 

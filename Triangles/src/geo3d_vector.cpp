@@ -3,6 +3,19 @@
 // Triangle methods
 namespace geometry3D {
 
+// Public methods
+float Vector::length() const {
+  float lgth = std::sqrt((dir.x * dir.x) + (dir.y * dir.y) + (dir.z * dir.z));
+  return lgth;
+}
+
+Vector &Vector::divideByScalar(float scalar) {
+  dir.x /= scalar;
+  dir.y /= scalar;
+  dir.z /= scalar;
+  return *this;
+}
+
 // Static methods
 float Vector::ScalarProduct(const Vector &lhs, const Vector &rhs) {
   float prodRes = (lhs.dir.x * rhs.dir.x) + (lhs.dir.y * rhs.dir.y) +
