@@ -30,7 +30,7 @@ public:
   void dump(std::ostream& OS) const {
     OS << "LFU {id: fr}: {";
     bool firstElem = true;
-    for (auto it = idToElem.begin(), end = idToElem.end(); it != end; ++it) {
+    for (const auto& it : idToElem) {
       std::string sep = firstElem ? "" : ", ";
       OS << sep << it->second->id << ":" << it->second->freq;
       firstElem = false;
