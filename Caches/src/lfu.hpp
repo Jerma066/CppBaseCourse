@@ -27,7 +27,7 @@ public:
     sz_(size), valueFromIdFunc(dataGetter) {}
 
 public:
-  void dump(std::ostream& OS) {
+  void dump(std::ostream& OS) const {
     OS << "LFU {id: fr}: {";
     bool firstElem = true;
     for (auto it = idToElem.begin(), end = idToElem.end(); it != end; ++it) {

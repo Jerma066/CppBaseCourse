@@ -15,13 +15,13 @@ public:
   explicit BeladyScore(size_t size): sz_(size){}
   
 public:
-  std::vector<size_t> getSortedCacheIDs() {
+  std::vector<size_t> getSortedCacheIDs() const {
     std::vector<size_t> cacheIDs = std::vector(cache.begin(), cache.end());
     std::sort(cacheIDs.begin(), cacheIDs.end());
     return cacheIDs;
   }
 
-  void dump(std::ostream &OS) {
+  void dump(std::ostream &OS) const {
     OS << "Cache IDs: ";
     for (auto elem : cache)
       OS << elem << ' ';
