@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <unordered_map>
 #include <functional>
+#include <cassert>
 
 namespace caches {
 
@@ -72,9 +73,14 @@ private:
   }
 
   void UpdateElemFreq(size_t id) {
+    // TODO: Should process errors somehow else
+    assert(idToElem.find(id) != idToElem.end() &&
+           "Elemet with id shoud be presented in idToElem hash!");
     auto Elem = *idToElem[id];
+    assert(Elem.freq >= minFreq &&
+           "Elemet frequency under id shoud be equal or more than minFreq!");
     freqToElems[Elem.freq].erase(idToElem[id]); 
-    if(freqToElems[minFreq].size() == 0)
+    if(freqToElems[minFreq].empty())
       minFreq++;
     
     Elem.freq++;
