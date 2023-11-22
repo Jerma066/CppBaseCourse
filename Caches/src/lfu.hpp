@@ -63,9 +63,12 @@ private:
   }
 
   void InsertNewElement(size_t id) {
-    minFreq = 1;
-    freqToElems[1].push_front(Elem{id, 1, valueFromIdFunc(id)});
-    idToElem[id] = freqToElems[1].begin();
+    size_t initialFrequency = 1;
+
+    freqToElems[initialFrequency].emplace_front(id, initialFrequency,
+                                                valueFromIdFunc(id));
+    idToElem[id] = freqToElems[initialFrequency].begin();
+    minFreq = initialFrequency;
   }
 
   void UpdateElemFreq(size_t id) {
@@ -80,6 +83,9 @@ private:
   }
 private:
   struct Elem {
+    Elem() {}
+    Elem(size_t id, size_t fr, Data val) : id(id), freq(fr), value(val) {}
+
     size_t id;
     size_t freq;
     Data value;
