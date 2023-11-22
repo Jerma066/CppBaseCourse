@@ -1,7 +1,7 @@
 CXX=g++
 CXXFLAGS= -std=c++1z -O2
 INC= -I ./src
-TARGETS= ./src/geo3d_point.cpp ./src/geo3d_vector.cpp ./src/geo3d_triangle.cpp
+TARGETS= ./src/geo3d_point.cpp ./src/geo3d_vector.cpp ./src/geo3d_plane.cpp ./src/geo3d_triangle.cpp
 
 all:
 	$(CXX) $(CXXFLAGS) $(INC) main.cpp -o main

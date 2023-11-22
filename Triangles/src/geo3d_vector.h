@@ -23,6 +23,12 @@ struct Vector final {
   Point dir;
 };
 
+namespace Axis {
+const Vector X = Vector({1, 0, 0});
+const Vector Y = Vector({0, 1, 0});
+const Vector Z = Vector({0, 0, 1});
+} // namespace Axis
+
 } // namespace geometry3D
 
 // Vector operators
