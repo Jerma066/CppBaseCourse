@@ -1,6 +1,6 @@
-#include "geo3d_triangle.h"
+#include "geo3d_vector.h"
 
-// Triangle methods
+// Vector methods
 namespace geometry3D {
 
 // Public methods

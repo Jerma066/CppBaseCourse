@@ -101,14 +101,135 @@ TEST(Geometry3DVector, DivideByScalar) {
 }
 
 TEST(Geometry3DTriangle, GetNormalVector) {
-  geometry3D::Point p1({0, 0, 0});
-  geometry3D::Point p2({3, 0, 0});
-  geometry3D::Point p3({0, 4, 0});
+  geometry3D::Point p1(0, 0, 0);
+  geometry3D::Point p2(3, 0, 0);
+  geometry3D::Point p3(0, 4, 0);
   geometry3D::Triangle pifTr({p1, p2, p3});
 
   geometry3D::Vector expectedNorm({0, 0, 1});
   bool res = (pifTr.getNormalVector() == expectedNorm);
   EXPECT_EQ(res, true);
+}
+
+TEST(Geometry3DMisc, Kramer2D) {
+  {
+    bool res =
+        geometry3D::detail::Kramer2D(1, 0, 3, 0, 2, 8) == std::make_tuple(3, 4);
+    EXPECT_EQ(res, true);
+  }
+
+  {
+    bool res = geometry3D::detail::Kramer2D(1, 6, 4, 7, 2, 8) ==
+               std::make_tuple(1, 0.5);
+    EXPECT_EQ(res, true);
+  }
+}
+
+TEST(Geometry3DPlane, getIntersectionLine) {
+  using namespace geometry3D;
+
+  {
+    Plane fplane(2, 3, 0, 1);
+    Plane splane(1, -2, 1, -3);
+    Line res = Plane::getIntersectionLine(fplane, splane);
+    bool dirRes = (res.dir == Vector({3, -2, -7}));
+    bool startPtRes = (res.startPt == Point(1, -1, 0));
+    EXPECT_EQ(dirRes, true);
+    EXPECT_EQ(startPtRes, true);
+  }
+
+  {
+    Plane fplane(1, 0, 3, 7);
+    Plane splane(2, 3, 3, 2);
+    Line res = Plane::getIntersectionLine(fplane, splane);
+    EXPECT_EQ(res.dir == Vector({-9, 3, 3}), true);
+    EXPECT_EQ(res.startPt == Point(-7, 4, 0), true);
+  }
+
+  {
+    Plane fplane(1, 2, -3, -2);
+    Plane splane(1, 0, -1, 4);
+    Line res = Plane::getIntersectionLine(fplane, splane);
+    EXPECT_EQ(res.dir == Vector({-2, -2, -2}), true);
+    EXPECT_EQ(res.startPt == Point(-4, 3, 0), true);
+  }
+
+  {
+    Plane fplane(2, 1, -1, -1);
+    Plane splane(1, 3, -2, 0);
+    Line res = Plane::getIntersectionLine(fplane, splane);
+    EXPECT_EQ(res.dir == Vector({1, 3, 5}), true);
+    EXPECT_EQ(res.startPt == Point(0.6, -0.2, 0), true);
+  }
+
+  {
+    Plane fplane(0, 1, 0, 0);
+    Plane splane(0, 0, 1, 0);
+    Line res = Plane::getIntersectionLine(fplane, splane);
+    EXPECT_EQ(res.dir == Vector({1, 0, 0}), true);
+    EXPECT_EQ(res.startPt == Point(0, 0, 0), true);
+  }
+
+  {
+    Plane fplane(0, 0, 1, 0);
+    Plane splane(1, 0, 0, 0);
+    Line res = Plane::getIntersectionLine(fplane, splane);
+    EXPECT_EQ(res.dir == Vector({0, 1, 0}), true);
+    EXPECT_EQ(res.startPt == Point(0, 0, 0), true);
+  }
+
+  {
+    Plane fplane(1, 0, 0, 0);
+    Plane splane(0, 1, 0, 0);
+    Line res = Plane::getIntersectionLine(fplane, splane);
+    EXPECT_EQ(res.dir == Vector({0, 0, 1}), true);
+    EXPECT_EQ(res.startPt == Point(0, 0, 0), true);
+  }
+}
+
+TEST(Geometry3DTriangle, GetPlane) {
+  {
+    geometry3D::Point p1(0, 0, 0);
+    geometry3D::Point p2(3, 0, 0);
+    geometry3D::Point p3(0, 4, 0);
+    geometry3D::Triangle pifTr({p1, p2, p3});
+
+    geometry3D::Plane expectedPlane(0, 0, 1, 0);
+    EXPECT_EQ(pifTr.getPlane() == expectedPlane, true);
+  }
+
+  {
+    geometry3D::Point p1(0, 4, 7);
+    geometry3D::Point p2(3, 0, 7);
+    geometry3D::Point p3(0, 0, 7);
+    geometry3D::Triangle pifTr({p1, p2, p3});
+
+    geometry3D::Plane expectedPlane(0, 0, -1, 7);
+    EXPECT_EQ(pifTr.getPlane() == expectedPlane, true);
+  }
+}
+
+TEST(Geometry3DTriangle, IsIntersectPlane) {
+  using namespace geometry3D;
+  {
+    geometry3D::Point p1(0, 0, 0);
+    geometry3D::Point p2(3, 0, 0);
+    geometry3D::Point p3(0, 4, 0);
+    geometry3D::Triangle tr({p1, p2, p3});
+
+    geometry3D::Plane xy1(0, 0, 1, 1);
+    EXPECT_EQ(tr.isIntersect(xy1) == Triangle::NoIntersection, true);
+  }
+
+  {
+    geometry3D::Point p1(5, 0, 2);
+    geometry3D::Point p2(0, 3, 2);
+    geometry3D::Point p3(0, -3, 2);
+    geometry3D::Triangle tr({p1, p2, p3});
+
+    geometry3D::Plane yz4(1, 0, 0, -4);
+    EXPECT_EQ(tr.isIntersect(yz4) == Triangle::P1Intersection, true);
+  }
 }
 
 int main(int argc, char **argv) {
