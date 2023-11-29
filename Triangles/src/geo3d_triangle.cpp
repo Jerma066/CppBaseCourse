@@ -61,6 +61,56 @@ Triangle::IntersectionKind Triangle::isIntersect(const Plane &pl) const {
   return Triangle::NoIntersection;
 }
 
+std::pair<float, float> Triangle::findProjectionOnIntersectionLine(
+    const Line &intersectLine, const Plane &trPlane,
+    IntersectionKind interPosition) const {
+
+  float pv1 = Vector::ScalarProduct(intersectLine.dir,
+                                    Vector(intersectLine.startPt, p1));
+  float pv2 = Vector::ScalarProduct(intersectLine.dir,
+                                    Vector(intersectLine.startPt, p2));
+  float pv3 = Vector::ScalarProduct(intersectLine.dir,
+                                    Vector(intersectLine.startPt, p3));
+
+  auto calcIntersectionIntervalValues = [](float pv1, float pv2, float d1,
+                                           float d2) {
+    if (d2 == 0 || d2 == -0)
+      return pv1;
+
+    return pv2 + ((pv1 - pv2) * d2 / (d2 - d1));
+  };
+
+  float t1 = 0, t2 = 0;
+  switch (interPosition) {
+  case Triangle::P1Intersection: {
+    t1 = calcIntersectionIntervalValues(pv1, pv2, trPlane.substitutePoint(p1),
+                                        trPlane.substitutePoint(p2));
+    t2 = calcIntersectionIntervalValues(pv1, pv3, trPlane.substitutePoint(p1),
+                                        trPlane.substitutePoint(p3));
+    break;
+  }
+  case Triangle::P2Intersection: {
+    t1 = calcIntersectionIntervalValues(pv2, pv1, trPlane.substitutePoint(p2),
+                                        trPlane.substitutePoint(p1));
+    t2 = calcIntersectionIntervalValues(pv2, pv3, trPlane.substitutePoint(p2),
+                                        trPlane.substitutePoint(p3));
+    break;
+  }
+  case Triangle::P3Intersection: {
+    t1 = calcIntersectionIntervalValues(pv3, pv1, trPlane.substitutePoint(p3),
+                                        trPlane.substitutePoint(p1));
+    t2 = calcIntersectionIntervalValues(pv3, pv2, trPlane.substitutePoint(p3),
+                                        trPlane.substitutePoint(p2));
+    break;
+  }
+  default:
+    // TODO: provide some error report
+    break;
+  }
+
+  return std::make_pair(std::min(t1, t2), std::max(t1, t2));
+}
+
 bool Triangle::isIntersect(const Triangle& tr) const {
   // Compute plane equation of triangles
   // Reject as trival if all points of triangles are on same side
@@ -76,9 +126,26 @@ bool Triangle::isIntersect(const Triangle& tr) const {
 
   bool isCoplanar = (IntersectP1T2 == Triangle::LiesIn) &&
                     (IntersectP2T1 == Triangle::LiesIn);
+  // Non-coplanar case
   if (!isCoplanar) {
-    return false;
+    Line intersectLine = Plane::getIntersectionLine(trglPlane, thisPlane);
+    auto thisInterval = findProjectionOnIntersectionLine(
+        intersectLine, trglPlane, IntersectP2T1);
+    auto trglInterval = tr.findProjectionOnIntersectionLine(
+        intersectLine, thisPlane, IntersectP1T2);
+
+    // No intersection between projections
+    if ((thisInterval.first > trglInterval.second &&
+         thisInterval.second > trglInterval.second) ||
+        (trglInterval.first > thisInterval.second &&
+         trglInterval.second > thisInterval.second))
+      return false;
+
+    return true;
   }
+
+  // Coplanar case
+  // TODO: Should implement coplanar triangles intersection test
 
   return false;
 }

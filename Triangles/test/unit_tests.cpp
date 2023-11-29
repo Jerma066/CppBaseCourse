@@ -207,6 +207,15 @@ TEST(Geometry3DTriangle, GetPlane) {
     geometry3D::Plane expectedPlane(0, 0, -1, 7);
     EXPECT_EQ(pifTr.getPlane() == expectedPlane, true);
   }
+  {
+    geometry3D::Point p1(0, 4, 7);
+    geometry3D::Point p2(3, 0, 7);
+    geometry3D::Point p3(0, 0, 7);
+    geometry3D::Triangle pifTr({p1, p2, p3});
+
+    geometry3D::Plane expectedPlane(0, 0, -1, 7);
+    EXPECT_EQ(pifTr.getPlane() == expectedPlane, true);
+  }
 }
 
 TEST(Geometry3DTriangle, IsIntersectPlane) {
@@ -229,6 +238,22 @@ TEST(Geometry3DTriangle, IsIntersectPlane) {
 
     geometry3D::Plane yz4(1, 0, 0, -4);
     EXPECT_EQ(tr.isIntersect(yz4) == Triangle::P1Intersection, true);
+  }
+}
+
+TEST(Geometry3DTriangle, NonCoplanarIntersection) {
+  using namespace geometry3D;
+  {
+    Triangle tr1(Point(0, 0, 0), Point(1, 0, 0), Point(0, 1, 0));
+    Triangle tr2(Point(0, 0, 0.01), Point(5, 5, 0.01), Point(5, 5, -0.09));
+    EXPECT_EQ(tr1.isIntersect(tr2), true);
+    EXPECT_EQ(tr2.isIntersect(tr1), true);
+  }
+  {
+    Triangle tr1(Point(5, 0, 2), Point(0, 3, 2), Point(0, -3, 2));
+    Triangle tr2(Point(0, 0, 7), Point(0, 2.57, -2), Point(0, -2.57, -2));
+    EXPECT_EQ(tr1.isIntersect(tr2), true);
+    EXPECT_EQ(tr2.isIntersect(tr1), true);
   }
 }
 
