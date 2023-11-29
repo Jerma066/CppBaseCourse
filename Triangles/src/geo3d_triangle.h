@@ -9,6 +9,9 @@
 namespace geometry3D {
 
 struct Triangle final {
+  Triangle() = default;
+  Triangle(Point pt1, Point pt2, Point pt3) : p1(pt1), p2(pt2), p3(pt3) {}
+
   enum IntersectionKind {
     NoIntersection,
     P1Intersection,
@@ -23,6 +26,13 @@ struct Triangle final {
   IntersectionKind isIntersect(const Plane &pl) const;
   bool isIntersect(const Triangle& tr) const;
 
+private:
+  std::pair<float, float>
+  findProjectionOnIntersectionLine(const Line &intersectionLine,
+                                   const Plane &trPlane,
+                                   IntersectionKind interPosition) const;
+
+public:
   Point p1, p2, p3;
   const float epsilon = std::pow(10.0, -14.0);
 };
