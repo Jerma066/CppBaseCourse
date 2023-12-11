@@ -1,13 +1,13 @@
 CXX=g++
 CXXFLAGS= -std=c++1z -O2
 INC= -I ./src
-TARGETS= ./src/geo3d_point.cpp ./src/geo3d_vector.cpp ./src/geo3d_plane.cpp ./src/geo3d_triangle.cpp
+TARGETS= ./src/geo3d_point.cpp ./src/geo3d_vector.cpp ./src/geo3d_plane.cpp ./src/geo3d_triangle.cpp ./src/geometry2D/geo2d_triangle.cpp ./src/geometry2D/geo2d_vector.cpp
 
 all:
-	$(CXX) $(CXXFLAGS) $(INC) main.cpp -o main
+	$(CXX) $(CXXFLAGS) $(INC) $(TARGETS) main.cpp -o main
 
 debug:
-	$(CXX) $(INC) main.cpp -g -o main
+	$(CXX) $(INC) $(TARGETS) main.cpp -g -o main
 
 unit_tests:
 	$(CXX) $(CXXFLAGS) $(INC) $(TARGETS) ./test/unit_tests.cpp -lgtest -o unit_tests

@@ -21,8 +21,9 @@ struct Line {
 
 struct Plane final {
   Plane(float kx, float ky, float kz, float d) : normal({kx, ky, kz}), D(d) {}
-
   Plane(Vector norm, float d) : normal(norm), D(d) {}
+
+  enum AxisAlignedPlaneKind { XY, YZ, XZ };
 
   float substitutePoint(const Point &pt) const {
     return D + Vector::ScalarProduct(normal, Vector(pt));

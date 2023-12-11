@@ -241,7 +241,7 @@ TEST(Geometry3DTriangle, IsIntersectPlane) {
   }
 }
 
-TEST(Geometry3DTriangle, NonCoplanarIntersection) {
+TEST(Geometry3DTriangle, NonCoplanarIntersectionTest) {
   using namespace geometry3D;
   {
     Triangle tr1(Point(0, 0, 0), Point(1, 0, 0), Point(0, 1, 0));
@@ -252,6 +252,72 @@ TEST(Geometry3DTriangle, NonCoplanarIntersection) {
   {
     Triangle tr1(Point(5, 0, 2), Point(0, 3, 2), Point(0, -3, 2));
     Triangle tr2(Point(0, 0, 7), Point(0, 2.57, -2), Point(0, -2.57, -2));
+    EXPECT_EQ(tr1.isIntersect(tr2), true);
+    EXPECT_EQ(tr2.isIntersect(tr1), true);
+  }
+  {
+    Triangle tr1(Point(5, 0, 2), Point(0, 3, 2), Point(0, -3, 2));
+    Triangle tr2(Point(4, 2, 0), Point(4, 6, 0), Point(4, 2, 8));
+    EXPECT_EQ(tr1.isIntersect(tr2), false);
+    EXPECT_EQ(tr2.isIntersect(tr1), false);
+  }
+  {
+    Triangle tr1(Point(1, 1, 3), Point(1, 7, 3), Point(7, 4, 3));
+    Triangle tr2(Point(2, 4, 0), Point(5, 4, 0), Point(7, 4, 3));
+    EXPECT_EQ(tr1.isIntersect(tr2), true);
+    EXPECT_EQ(tr2.isIntersect(tr1), true);
+  }
+  {
+    Triangle tr1(Point(4, 6, 3), Point(4, 6, 0), Point(0, 5, 1));
+    Triangle tr2(Point(4, 2, 0), Point(4, 6, 0), Point(4, 2, 8));
+    EXPECT_EQ(tr1.isIntersect(tr2), true);
+    EXPECT_EQ(tr2.isIntersect(tr1), true);
+  }
+}
+
+TEST(Geometry3DTriangle, CoplanarIntersectionTest) {
+  using namespace geometry3D;
+  {
+    Triangle tr1(Point(-267.7, 267.7, 0), Point(-227.215, 267.7, 0),
+                 Point(-267.7, 361.065, 0));
+    Triangle tr2(Point(366.365, 198.868, 0), Point(406.85, 198.868, 0),
+                 Point(366.365, 292.233, 0));
+    EXPECT_EQ(tr1.isIntersect(tr2), false);
+    EXPECT_EQ(tr2.isIntersect(tr1), false);
+  }
+}
+
+TEST(Geometry3DTriangle, OverallIntersectionTest) {
+  using namespace geometry3D;
+  {
+    Triangle tr1(Point(0, 0, 3), Point(1, 1, 3), Point(1, 0, 3));
+    Triangle tr2(Point(0, 0, 4), Point(1, 1, 4), Point(1, 0, 4));
+    EXPECT_EQ(tr1.isIntersect(tr2), false);
+    EXPECT_EQ(tr2.isIntersect(tr1), false);
+  }
+  {
+    Triangle tr1(Point(1, 1, 3), Point(1, 7, 3), Point(7, 4, 3));
+    Triangle tr2(Point(2, 4, 0), Point(5, 4, 0), Point(3, 4, 6));
+    EXPECT_EQ(tr1.isIntersect(tr2), true);
+    EXPECT_EQ(tr2.isIntersect(tr1), true);
+  }
+
+  {
+    Triangle tr1(Point(1, 0, 0), Point(0, 1, 0), Point(0, 0, 0));
+    Triangle tr2(Point(0.5, -0.5, 0), Point(-0.5, 0.5, 0), Point(0, 0, 2));
+    EXPECT_EQ(tr1.isIntersect(tr2), true);
+    EXPECT_EQ(tr2.isIntersect(tr1), true);
+  }
+
+  {
+    Triangle tr1(Point(1, 1, 3), Point(1, 7, 3), Point(7, 4, 3));
+    Triangle tr2(Point(9, 4, 0), Point(13, 4, 0), Point(10, 4, 6));
+    EXPECT_EQ(tr1.isIntersect(tr2), false);
+    EXPECT_EQ(tr2.isIntersect(tr1), false);
+  }
+  {
+    Triangle tr1(Point(0, 1, 3), Point(2, 3, 1), Point(-0.3, 0.5, -0.5));
+    Triangle tr2(Point(4, 0.7, 1), Point(0, 1.5, 0), Point(3, 0, -0.5));
     EXPECT_EQ(tr1.isIntersect(tr2), true);
     EXPECT_EQ(tr2.isIntersect(tr1), true);
   }
