@@ -17,6 +17,7 @@ Plane Triangle::getPlane() const {
 }
 
 Triangle::IntersectionKind Triangle::isIntersect(const Plane &pl) const {
+  // TODO: Add add comparison of maximum and minimum coordinateы values
   float p1Sbst = pl.substitutePoint(p1);
   float p2Sbst = pl.substitutePoint(p2);
   float p3Sbst = pl.substitutePoint(p3);
@@ -136,7 +137,7 @@ geometry2D::Triangle Triangle::getAxisAlignedProjection(
   return Res;
 }
 
-bool Triangle::isIntersect(const Triangle& tr) const {
+bool Triangle::isIntersect(const Triangle &tr) const {
   // Compute plane equation of triangles
   // Reject as trival if all points of triangles are on same side
   auto trglPlane = tr.getPlane();
@@ -195,7 +196,7 @@ bool Triangle::isIntersect(const Triangle& tr) const {
   return thisProjection.isIntersect(trglProjection);
 }
 
-} // geometry3D
+} // namespace geometry3D
 
 // Triangle operators
 std::basic_istream<char> &operator>>(std::basic_istream<char> &IS,
