@@ -285,6 +285,12 @@ TEST(Geometry3DTriangle, CoplanarIntersectionTest) {
     EXPECT_EQ(tr1.isIntersect(tr2), false);
     EXPECT_EQ(tr2.isIntersect(tr1), false);
   }
+  {
+    Triangle tr1(Point(3, 5, 2), Point(1, 5, 1), Point(2, 5, 1));
+    Triangle tr2(Point(202, 5, 140), Point(203, 5, 138), Point(203, 5, 139));
+    EXPECT_EQ(tr1.isIntersect(tr2), false);
+    EXPECT_EQ(tr2.isIntersect(tr1), false);
+  }
 }
 
 TEST(Geometry3DTriangle, OverallIntersectionTest) {
@@ -320,6 +326,12 @@ TEST(Geometry3DTriangle, OverallIntersectionTest) {
     Triangle tr2(Point(4, 0.7, 1), Point(0, 1.5, 0), Point(3, 0, -0.5));
     EXPECT_EQ(tr1.isIntersect(tr2), true);
     EXPECT_EQ(tr2.isIntersect(tr1), true);
+  }
+  {
+    Triangle tr1(Point(1, 2, 0), Point(0, 0, 1), Point(0, 0, 2));
+    Triangle tr2(Point(1, 2, 249), Point(3, 4, 250), Point(2, 3, 249));
+    EXPECT_EQ(tr1.isIntersect(tr2), false);
+    EXPECT_EQ(tr2.isIntersect(tr1), false);
   }
 }
 
