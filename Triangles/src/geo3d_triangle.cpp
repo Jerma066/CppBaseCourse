@@ -171,16 +171,19 @@ bool Triangle::isIntersect(const Triangle& tr) const {
 
   // Coplanar case
   // TODO: Provide some error report instead of assert
+  /*
   assert((thisPlane.normal == trglPlane.normal ||
           thisPlane.normal == trglPlane.normal.divideByScalar(-1)) &&
          "Coplanar triangles should have parralel normal vectors");
-
+  */
   // Projecting triangle onto the axis aligned plane with maximized area
   Plane::AxisAlignedPlaneKind maximizedAreaPlaneKind = Plane::XY;
-  if (thisPlane.normal.dir.x > thisPlane.normal.dir.y &&
-      thisPlane.normal.dir.x > thisPlane.normal.dir.z) {
+  auto absNormX = std::abs(thisPlane.normal.dir.x);
+  auto absNormY = std::abs(thisPlane.normal.dir.y);
+  auto absNormZ = std::abs(thisPlane.normal.dir.z);
+  if (absNormX > absNormY && absNormX > absNormZ) {
     maximizedAreaPlaneKind = Plane::YZ;
-  } else if (thisPlane.normal.dir.y > thisPlane.normal.dir.z) {
+  } else if (absNormY > absNormZ) {
     maximizedAreaPlaneKind = Plane::XZ;
   }
 

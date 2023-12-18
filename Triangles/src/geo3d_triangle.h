@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cassert>
-#include <istream>
+#include <iostream>
 
 #include "geo3d_plane.h"
 #include "geo3d_vector.h"
@@ -27,6 +27,13 @@ struct Triangle final {
 
   IntersectionKind isIntersect(const Plane &pl) const;
   bool isIntersect(const Triangle& tr) const;
+
+  void dump(std::basic_ostream<char> &OS = std::cout) {
+    OS << "Triagnle: "
+       << "{p1(" << p1.x << "," << p1.y << "," << p1.z << "),  "
+       << "{p2(" << p2.x << "," << p2.y << "," << p2.z << "),  "
+       << "{p3(" << p3.x << "," << p3.y << "," << p3.z << ")}" << std::endl;
+  }
 
 private:
   std::pair<float, float>
