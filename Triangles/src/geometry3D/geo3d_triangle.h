@@ -3,9 +3,9 @@
 #include <cassert>
 #include <iostream>
 
+#include "geo2d_triangle.h"
 #include "geo3d_plane.h"
 #include "geo3d_vector.h"
-#include "geometry2D/geo2d_triangle.h"
 
 // Triangle methods
 namespace geometry3D {
@@ -26,7 +26,7 @@ struct Triangle final {
   Plane getPlane() const;
 
   IntersectionKind isIntersect(const Plane &pl) const;
-  bool isIntersect(const Triangle& tr) const;
+  bool isIntersect(const Triangle &tr) const;
 
   void dump(std::basic_ostream<char> &OS = std::cout) {
     OS << "Triagnle: "
