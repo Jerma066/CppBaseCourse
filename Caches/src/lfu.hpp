@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <unordered_map>
 #include <functional>
+#include <cassert>
 
 namespace caches {
 
@@ -27,10 +28,10 @@ public:
     sz_(size), valueFromIdFunc(dataGetter) {}
 
 public:
-  void dump(std::ostream& OS) {
+  void dump(std::ostream& OS) const {
     OS << "LFU {id: fr}: {";
     bool firstElem = true;
-    for (auto it = idToElem.begin(), end = idToElem.end(); it != end; ++it) {
+    for (const auto& it : idToElem) {
       std::string sep = firstElem ? "" : ", ";
       OS << sep << it->second->id << ":" << it->second->freq;
       firstElem = false;
@@ -63,15 +64,23 @@ private:
   }
 
   void InsertNewElement(size_t id) {
-    minFreq = 1;
-    freqToElems[1].push_front(Elem{id, 1, valueFromIdFunc(id)});
-    idToElem[id] = freqToElems[1].begin();
+    size_t initialFrequency = 1;
+
+    freqToElems[initialFrequency].emplace_front(id, initialFrequency,
+                                                valueFromIdFunc(id));
+    idToElem[id] = freqToElems[initialFrequency].begin();
+    minFreq = initialFrequency;
   }
 
   void UpdateElemFreq(size_t id) {
+    // TODO: Should process errors somehow else
+    assert(idToElem.find(id) != idToElem.end() &&
+           "Elemet with id shoud be presented in idToElem hash!");
     auto Elem = *idToElem[id];
+    assert(Elem.freq >= minFreq &&
+           "Elemet frequency under id shoud be equal or more than minFreq!");
     freqToElems[Elem.freq].erase(idToElem[id]); 
-    if(freqToElems[minFreq].size() == 0)
+    if(freqToElems[minFreq].empty())
       minFreq++;
     
     Elem.freq++;
@@ -80,6 +89,9 @@ private:
   }
 private:
   struct Elem {
+    Elem() {}
+    Elem(size_t id, size_t fr, Data val) : id(id), freq(fr), value(val) {}
+
     size_t id;
     size_t freq;
     Data value;

@@ -15,20 +15,20 @@ public:
   explicit BeladyScore(size_t size): sz_(size){}
   
 public:
-  std::vector<size_t> getSortedCacheIDs() {
+  std::vector<size_t> getSortedCacheIDs() const {
     std::vector<size_t> cacheIDs = std::vector(cache.begin(), cache.end());
     std::sort(cacheIDs.begin(), cacheIDs.end());
     return cacheIDs;
   }
 
-  void dump(std::ostream &OS) {
+  void dump(std::ostream &OS) const {
     OS << "Cache IDs: ";
-    for (auto elem : cache)
+    for (const auto& elem : cache)
       OS << elem << ' ';
     OS << '\n';
 
     OS << "Remotenes: ";
-    for (auto pair : beladyRemoteness)
+    for (const auto& pair : beladyRemoteness)
       OS << '{' << *pair.second << ';' << pair.first << "} ";
     OS << std::endl;
   }
@@ -80,7 +80,7 @@ private:
 
   void UpdateCacheElements(size_t pos) {
     std::map<size_t, std::unordered_set<size_t>::iterator> newBeladyRemoteness;
-    for (auto belRemElem : beladyRemoteness) {
+    for (const auto& belRemElem : beladyRemoteness) {
       std::pair<bool, size_t> nextPos =
           GetNextPositionOfElem(pos, *belRemElem.second);
 
