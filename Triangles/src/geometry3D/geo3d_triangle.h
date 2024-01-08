@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <tuple>
 
 #include "geo2d_triangle.h"
 #include "geo3d_plane.h"

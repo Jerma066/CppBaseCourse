@@ -17,7 +17,7 @@ Plane Triangle::getPlane() const {
 }
 
 Triangle::IntersectionKind Triangle::isIntersect(const Plane &pl) const {
-  // TODO: Add add comparison of maximum and minimum coordinateы values
+  // TODO: Add add comparison of maximum and minimum coordinates values
   float p1Sbst = pl.substitutePoint(p1);
   float p2Sbst = pl.substitutePoint(p2);
   float p3Sbst = pl.substitutePoint(p3);
@@ -73,15 +73,38 @@ std::pair<float, float> Triangle::findProjectionOnIntersectionLine(
   float pv3 = Vector::ScalarProduct(intersectLine.dir,
                                     Vector(intersectLine.startPt, p3));
 
-  auto calcIntersectionIntervalValues = [](float pv1, float pv2, float d1,
-                                           float d2) {
-    if (d2 == 0 || d2 == -0)
-      return pv2;
-
-    return pv2 + ((pv1 - pv2) * d2 / (d2 - d1));
+  auto calcIntersectionIntervalValues = [](float pv1, float pv2, float pv3,
+                                           float d1, float d2, float d3) {
+    float isect1 = pv1 + ((pv2 - pv1) * d1 / (d1 - d2));
+    float isect2 = pv1 + ((pv3 - pv1) * d1 / (d1 - d3));
+    return std::make_tuple(isect1, isect2);
   };
 
+  float d1 = trPlane.substitutePoint(p1),
+        d2 = trPlane.substitutePoint(p2),
+        d3 = trPlane.substitutePoint(p3);
+
   float t1 = 0, t2 = 0;
+  if (d1 * d2 > 0.0f) {
+    std::tie(t1, t2) =
+      calcIntersectionIntervalValues(pv3, pv1, pv2, d3, d1, d2);
+  } else if (d1 * d3 > 0.0f) {
+    std::tie(t1, t2) =
+      calcIntersectionIntervalValues(pv2, pv1, pv3, d2, d1, d3);
+  } else if (d2 * d3 > 0.0f || d1 != 0) {
+    std::tie(t1, t2) =
+      calcIntersectionIntervalValues(pv1, pv2, pv3, d1, d2, d3);
+  } else if (d2 != 0.0f) {
+    std::tie(t1, t2)
+      = calcIntersectionIntervalValues(pv2, pv1, pv3, d2, d1, d3);
+  } else if (d3 != 0.0f) {
+    std::tie(t1, t2)
+      = calcIntersectionIntervalValues(pv3, pv1, pv2, d3, d1, d2);
+  } else {
+    // TODO: Provide some error report;
+    //       It is coplanar case or invalid triangle.
+  }
+/*
   switch (interPosition) {
   case Triangle::P1Intersection: {
     t1 = calcIntersectionIntervalValues(pv1, pv2, trPlane.substitutePoint(p1),
@@ -108,7 +131,7 @@ std::pair<float, float> Triangle::findProjectionOnIntersectionLine(
     // TODO: provide some error report
     break;
   }
-
+*/
   return std::make_pair(std::min(t1, t2), std::max(t1, t2));
 }
 
