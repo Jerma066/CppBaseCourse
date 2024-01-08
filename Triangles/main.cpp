@@ -30,8 +30,7 @@ int main() {
   }
 
   for (auto elem : result)
-    std::cout << elem << " ";
+    std::cout << elem << "\n";
 
-  std::cout << std::endl;
   return 0;
 }
