@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "matrix.hpp"
+#include "myvector.hpp"
 #include "rational.h"
 
 // ----- Rational tests -------------------------------------------------------
@@ -166,6 +167,119 @@ TEST(Rational, Equality) {
     nums::Rational rhsRNum(5, -15);
     EXPECT_EQ(lhsRNum == rhsRNum, true);
     EXPECT_EQ(lhsRNum != rhsRNum, false);
+  }
+}
+
+// ----- MyVector tests -------------------------------------------------------
+TEST(MyVector, Constructor) {
+  {
+    mystd::MyVector<int> vec(5);
+    EXPECT_EQ(vec.size(), 5);
+    EXPECT_EQ(vec.capacity(), 5);
+
+    mystd::MyVector<int> cvec(vec);
+    EXPECT_EQ(cvec.size(), 5);
+    EXPECT_EQ(cvec.capacity(), 5);
+
+    mystd::MyVector<int> mvec(std::move(vec));
+    EXPECT_EQ(mvec.size(), 5);
+    EXPECT_EQ(mvec.capacity(), 5);
+    EXPECT_EQ(vec.size(), 0);
+    EXPECT_EQ(vec.capacity(), 0);
+  }
+
+  {
+    mystd::MyVector<int> vec({1, 2, 3, 4, 5});
+    EXPECT_EQ(vec.size(), 5);
+    EXPECT_EQ(vec.capacity(), 5);
+  }
+}
+
+TEST(MyVector, Assigment) {
+  {
+    mystd::MyVector<float> vec(3);
+    
+    mystd::MyVector<float> cvec = vec;
+    EXPECT_EQ(cvec.size(), 3);
+    EXPECT_EQ(cvec.capacity(), 3);
+
+    mystd::MyVector<float> mvec = std::move(vec);
+    EXPECT_EQ(mvec.size(), 3);
+    EXPECT_EQ(mvec.capacity(), 3);
+    EXPECT_EQ(vec.size(), 0);
+    EXPECT_EQ(vec.capacity(), 0);
+  }
+  {
+    mystd::MyVector<float> vec = {1.0, 2.0, 3.0};
+    EXPECT_EQ(vec.size(), 3);
+    EXPECT_EQ(vec.capacity(), 3);
+  }
+}
+
+TEST(MyVector, SquareBracketsOperator) {
+  {
+    mystd::MyVector<double> vec = {1.0, 2.0, 3.0};
+    EXPECT_EQ(vec[0], 1.0);
+    EXPECT_EQ(vec[1], 2.0);
+    EXPECT_EQ(vec[2], 3.0);    
+  }
+  {
+    const mystd::MyVector<double> vec = {1.0, 2.0, 3.0};
+    EXPECT_EQ(vec[0], 1.0);
+    EXPECT_EQ(vec[1], 2.0);
+    EXPECT_EQ(vec[2], 3.0);
+  }
+  {
+    mystd::MyVector<char> vec = {'a', 'b', 'c', 'd', 'f'};
+    try {
+      vec[5];
+    } catch (const std::runtime_error& e) {
+      EXPECT_TRUE(true);
+    }
+  }
+}
+
+TEST(MyVector, BackPopPush) {
+  {
+    mystd::MyVector<size_t> vec = {37};
+    EXPECT_EQ(vec.back(), 37);
+  }
+  {
+    mystd::MyVector<long long> vec;
+    try {
+      vec.back();
+    } catch (const std::runtime_error& e) {
+      EXPECT_TRUE(true);
+    }
+  }
+  {
+    mystd::MyVector<long long> vec = {1, 2};
+    EXPECT_EQ(vec.back(), 2);
+    vec.pop_back();
+    EXPECT_EQ(vec.back(), 1);
+    vec.pop_back();
+    try {
+      vec.pop_back();
+    } catch (const std::runtime_error& e) {
+      EXPECT_TRUE(true);
+    }
+  }
+  {
+    mystd::MyVector<char> vec = {'K', 'A', 'M', 'I'};
+    EXPECT_EQ(vec.back(), 'I');
+    EXPECT_EQ(vec.size(), 4);
+    EXPECT_EQ(vec.capacity(), 4);
+
+    vec.push_back('N');
+    vec.push_back('N');
+    EXPECT_EQ(vec.back(), 'N');
+    EXPECT_EQ(vec.size(), 6);
+    EXPECT_EQ(vec.capacity(), 9);
+
+    vec.pop_back();
+    EXPECT_EQ(vec.back(), 'N');
+    EXPECT_EQ(vec.size(), 5);
+    EXPECT_EQ(vec.capacity(), 9);
   }
 }
 // ----- Matrices tests -------------------------------------------------------
