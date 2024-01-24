@@ -62,81 +62,15 @@ if __name__ == "__main__":
     print("Executable main file: % s" % args.executable)
     print("Directory containing tests: % s" % args.test_dir)
 
-    testResult = runTest(args.executable, args.test_dir + "test1.dat")
-    checkResult = chechTestResult(args.test_dir + "golden/test1.ans.dat", testResult)
-    print(checkResult)
+    test_files = [f for f in os.listdir(args.test_dir) if f.endswith('.dat') and not f.startswith('golden')]
 
-    testResult = runTest(args.executable, args.test_dir + "test2.dat")
-    checkResult = chechTestResult(args.test_dir + "golden/test2.ans.dat", testResult)
-    print(checkResult)
+    for test_file in test_files:
+        test_path = os.path.join(args.test_dir, test_file)
+        golden_path = os.path.join(args.test_dir, "golden", test_file.replace('.dat', '.ans.dat'))
 
-
-    testResult = runTest(args.executable, args.test_dir + "test3.dat")
-    checkResult = chechTestResult(args.test_dir + "golden/test3.ans.dat", testResult)
-    print(checkResult)
-
-    testResult = runTest(args.executable, args.test_dir + "test4.dat")
-    checkResult = chechTestResult(args.test_dir + "golden/test4.ans.dat", testResult)
-    print(checkResult)
-
-    testResult = runTest(args.executable, args.test_dir + "test5.dat")
-    checkResult = chechTestResult(args.test_dir + "golden/test5.ans.dat", testResult)
-    print(checkResult)
-
-    testResult = runTest(args.executable, args.test_dir + "test6.dat")
-    checkResult = chechTestResult(args.test_dir + "golden/test6.ans.dat", testResult)
-    print(checkResult)
-
-    testResult = runTest(args.executable, args.test_dir + "test7.dat")
-    checkResult = chechTestResult(args.test_dir + "golden/test7.ans.dat", testResult)
-    print(checkResult)
-
-    testResult = runTest(args.executable, args.test_dir + "test8.dat")
-    checkResult = chechTestResult(args.test_dir + "golden/test8.ans.dat", testResult)
-    print(checkResult)
-
-    testResult = runTest(args.executable, args.test_dir + "test9.dat")
-    checkResult = chechTestResult(args.test_dir + "golden/test9.ans.dat", testResult)
-    print(checkResult)
-
-    testResult = runTest(args.executable, args.test_dir + "test10.dat")
-    checkResult = chechTestResult(args.test_dir + "golden/test10.ans.dat", testResult)
-    print(checkResult)
-
-    testResult = runTest(args.executable, args.test_dir + "test11.dat")
-    checkResult = chechTestResult(args.test_dir + "golden/test11.ans.dat", testResult)
-    print(checkResult)
-
-    testResult = runTest(args.executable, args.test_dir + "test12.dat")
-    checkResult = chechTestResult(args.test_dir + "golden/test12.ans.dat", testResult)
-    print(checkResult)
-
-    testResult = runTest(args.executable, args.test_dir + "test13.dat")
-    checkResult = chechTestResult(args.test_dir + "golden/test13.ans.dat", testResult)
-    print(checkResult)
-
-    testResult = runTest(args.executable, args.test_dir + "test14.dat")
-    checkResult = chechTestResult(args.test_dir + "golden/test14.ans.dat", testResult)
-    print(checkResult)
-
-
-    testResult = runTest(args.executable, args.test_dir + "test15.dat")
-    checkResult = chechTestResult(args.test_dir + "golden/test15.ans.dat", testResult)
-    print(checkResult)
-
-
-    testResult = runTest(args.executable, args.test_dir + "test16.dat")
-    checkResult = chechTestResult(args.test_dir + "golden/test16.ans.dat", testResult)
-    print(checkResult)
-
-    testResult = runTest(args.executable, args.test_dir + "vki_005.dat")
-    checkResult = chechTestResult(args.test_dir + "golden/vki_005.ans.dat", testResult)
-    print(checkResult)
-
-    testResult = runTest(args.executable, args.test_dir + "vki_20-500.dat")
-    checkResult = chechTestResult(args.test_dir + "golden/vki_20-500.ans.dat", testResult)
-    print(checkResult)
-
-    testResult = runTest(args.executable, args.test_dir + "vki_011.dat")
-    checkResult = chechTestResult(args.test_dir + "golden/vki_011.ans.dat", testResult)
-    print(checkResult)
+        if os.path.exists(golden_path):
+            testResult = runTest(args.executable, test_path)
+            checkResult = chechTestResult(golden_path, testResult)
+            print(checkResult)
+        else:
+            print(f"Golden file for {test_file} not found")
