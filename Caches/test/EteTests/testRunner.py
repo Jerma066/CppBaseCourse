@@ -14,9 +14,8 @@ def isExe(fpath):
         return ret
 
 def runTest(execFile, testPath):
-    inputFile = open(testPath, 'r')
-    data = "".join(inputFile.readlines())
-    inputFile.close() 
+    with open(test_path, 'r') as input_file:
+        data = input_file.read()
     result = subprocess.run([execFile], capture_output=True, text=True, input=data)
     return result.stdout
 
