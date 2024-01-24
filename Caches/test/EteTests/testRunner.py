@@ -14,7 +14,8 @@ def isExe(fpath):
         return ret
 
 def runTest(execFile, testPath):
-    with open(test_path, 'r') as input_file:
+    """Run the test and return the output."""
+    with open(testPath, 'r') as input_file:
         data = input_file.read()
     result = subprocess.run([execFile], capture_output=True, text=True, input=data)
     return result.stdout
@@ -28,16 +29,13 @@ def findDiff(first, second):
     return chr(c)
  
 def chechTestResult(goldenPath, testResult):
-    goldenFile = open(goldenPath, 'r')
-    expectedResult = "".join(goldenFile.readlines())
-    goldenFile.close()
-    checkStatus = "FAIL"
+    """Check the test result against the golden file."""
+    with open(goldenPath, 'r') as golden_file:
+        expectedResult = golden_file.read()    
     if testResult == expectedResult:
-      checkStatus = "PASS"
+        return "PASS"
     else:
-      checkStatus += "\n-----\n" + testResult + "\nVS\n\n" + expectedResult + "-----" + '\n'
-    return checkStatus
-    
+        return f"FAIL\n-----\n{testResult}\nVS\n\n{expectedResult}-----\n"
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
