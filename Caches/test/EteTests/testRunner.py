@@ -4,9 +4,10 @@ import pathlib
 import stat
 import subprocess
 import sys
+from pathlib import Path
 
 def is_exe(fpath):
-    """ Return true if fpath is a file we have access to that is executable """
+    """Return true if fpath is a file we have access to that is executable."""
     accessmode = os.F_OK | os.X_OK
     if os.path.exists(fpath) and os.access(fpath, accessmode) and not os.path.isdir(fpath):
         filemode = os.stat(fpath).st_mode
@@ -14,7 +15,7 @@ def is_exe(fpath):
         return ret
 
 def run_test(exec_file, test_path):
-    """ Run the test and return the output."""
+    """Run the test and return the output."""
     with open(test_path, 'r') as input_file:
         data = input_file.read()
     result = subprocess.run([exec_file], capture_output=True, text=True, input=data)
@@ -29,13 +30,28 @@ def findDiff(first, second):
     return chr(c)
  
 def check_test_result(golden_path, test_result):
-    """ Check the test result against the golden file."""
+    """Check the test result against the golden file."""
     with open(golden_path, 'r') as golden_file:
         expected_result = golden_file.read()    
     if test_result == expected_result:
         return "PASS"
     else:
         return f"FAIL\n-----\n{test_result}\nVS\n\n{expected_result}-----\n"
+
+def find_tests_and_run(executable, directory):
+    """Find and run tests recursively in the directory."""
+    for test_file in directory.rglob('*.dat'):
+        # Checking that the test file is not in the golden folder
+        if not test_file.parts[-2] == "golden":
+            # Path to golden file
+            golden_file = test_file.parent / "golden" / test_file.with_suffix('.ans.dat').name
+            relative_path = test_file.relative_to(directory)
+            if golden_file.exists():
+                test_result = run_test(str(executable), str(test_file))
+                check_result = check_test_result(str(golden_file), test_result)
+                print(f"{relative_path}: {check_result}")
+            else:
+                print(f"Golden file for {relative_path} not found")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -46,28 +62,19 @@ if __name__ == "__main__":
 
     # Read arguments from command line
     args = parser.parse_args()
-    if not is_exe(args.executable):
-      print(f"{args.executable} is not an executable")
+    exec_path = Path(args.executable)
+    test_root_dir = Path(args.test_dir)
+
+    if not is_exe(exec_path):
+      print(f"{exec_path} is not an executable")
       sys.exit(1)
 
-    test_dir = pathlib.Path(args.test_dir)
-    if not test_dir.is_dir():
-      print(f"{args.test_dir} is not a directory")
+    if not test_root_dir.is_dir():
+      print(f"{args.test_root_dir} is not a directory")
       sys.exit(1)
 
     # Print checked arguments
-    print("Executable main file: % s" % args.executable)
-    print("Directory containing tests: % s" % args.test_dir)
+    print("Executable main file: % s" % exec_path)
+    print("Directory containing tests: % s" % test_root_dir)
 
-    test_files = [f for f in os.listdir(args.test_dir) if f.endswith('.dat') and not f.startswith('golden')]
-
-    for test_file in test_files:
-        test_path = os.path.join(args.test_dir, test_file)
-        golden_path = os.path.join(args.test_dir, "golden", test_file.replace('.dat', '.ans.dat'))
-
-        if os.path.exists(golden_path):
-            test_result = run_test(args.executable, test_path)
-            check_result = check_test_result(golden_path, test_result)
-            print(check_result)
-        else:
-            print(f"Golden file for {test_file} not found")
+    find_tests_and_run(exec_path, test_root_dir)
