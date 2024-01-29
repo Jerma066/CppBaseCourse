@@ -1,3 +1,6 @@
+#pragma once
+
+#include <cassert>
 #include <cstddef>
 #include <initializer_list>
 #include <stdexcept>
@@ -51,8 +54,8 @@ protected:
   size_t used_;
 };
 
-
 // TODO: Add class Iterator to support range-based for loops;
+//       Add constructor with default value;
 template <typename MVType> class MyVector final : private MyVectorBuf<MVType> {
   using MyVectorBuf<MVType>::arr_;
   using MyVectorBuf<MVType>::size_;
@@ -60,13 +63,23 @@ template <typename MVType> class MyVector final : private MyVectorBuf<MVType> {
 
 public:
   explicit MyVector(size_t size = 0) : MyVectorBuf<MVType>(size) {
-    used_ = size;
+    while (used_ < size) {
+      new (arr_ + used_) MVType();
+      used_++;
+    }
+  }
+
+  MyVector(size_t size, const MVType &defVal) : MyVectorBuf<MVType>(size) {
+    while (used_ < size) {
+      new (arr_ + used_) MVType(defVal);
+      used_++;
+    }
   }
 
   MyVector(MyVector &&vec) = default;
   MyVector &operator=(MyVector &&rhs) = default;
 
-  MyVector(const MyVector &rhs) : MyVector<MVType>(rhs.used_) {
+  MyVector(const MyVector &rhs) : MyVectorBuf<MVType>(rhs.used_) {
     while (used_ < rhs.used_) {
       new (arr_ + used_) MVType(rhs.arr_[used_]);
       used_++;
