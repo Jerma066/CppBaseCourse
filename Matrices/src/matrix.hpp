@@ -1,6 +1,8 @@
 #pragma once
 
-#include <vector>
+#include <tuple>
+
+#include "myvector.hpp"
 
 namespace linalg {
 
@@ -8,8 +10,8 @@ namespace linalg {
 template <typename DataType> struct Matrix final {
 public:
   explicit Matrix(size_t n)
-      : mData(std::vector<std::vector<DataType>>(n, std::vector<DataType>(n))) {
-  }
+      : mData(mystd::MyVector<mystd::MyVector<DataType>>(
+            n, mystd::MyVector<DataType>(n))) {}
 
 public:
   size_t size() const { return mData.size(); }
@@ -22,7 +24,8 @@ public:
       size_t row = i;
 
       // TODO: There is a search pattern in this for.
-      //       It should be replaced with std::find.
+      //       It can be replaced with std::find.
+      //       Itterators supportion required
       for (size_t j = row, end = mData.size(); j < mData.size(); ++j) {
         if (tmp[i][j] != DataType(0)) {
           row = j;
@@ -61,20 +64,20 @@ public:
   }
 
 public:
-  std::vector<DataType> &operator[](size_t i) {
+  mystd::MyVector<DataType> &operator[](size_t i) {
     if (i > mData.size())
       throw std::invalid_argument("Row index is out of range!");
 
     return mData[i];
   }
 
-  std::vector<std::vector<DataType>> mData;
+  mystd::MyVector<mystd::MyVector<DataType>> mData;
 };
 
 template <typename DataType> Matrix<DataType> makeEMatrix(size_t n) {
   Matrix<DataType> tmp(n);
   for (size_t i = 0; i < n; ++i) {
-    tmp[i] = std::vector<DataType>(n, DataType(0));
+    tmp[i] = mystd::MyVector<DataType>(n, DataType(0));
     tmp[i][i] = DataType(1);
   }
   return tmp;
