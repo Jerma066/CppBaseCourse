@@ -33,6 +33,7 @@ def find_tests_and_run(executable: Path, directory: Path) -> tuple:
     """Find and run tests recursively in the directory."""
     pass_count = fail_count = unsupported_count = 0 
     failed_tests = []
+    unsupported_tests = []
     for test_file in directory.rglob('*.dat'):
         # Checking that the test file is not in the golden folder
         if not test_file.parts[-2] == "golden":
@@ -49,13 +50,14 @@ def find_tests_and_run(executable: Path, directory: Path) -> tuple:
                     failed_tests.append((relative_path, result_message))
             else:
                 unsupported_count += 1
-                print(f"Golden file for {relative_path} not found")
-    return pass_count, fail_count, unsupported_count, failed_tests
+                unsupported_tests.append(relative_path)
+    return pass_count, fail_count, unsupported_count, failed_tests, unsupported_tests
 
 def generate_summary(pass_count: int, 
                      fail_count: int, 
                      unsupported_count: int,
                      failed_tests: list,
+                     unsupported_tests: list,
                      verbose_flag: bool = False
                      ) -> str:
     """Generate summary of test results."""
@@ -63,9 +65,14 @@ def generate_summary(pass_count: int,
     if fail_count > 0:
         summary += "\nFailed tests:\n"
         for failed_test, message in failed_tests:
-            summary += "\n" + str(failed_test)
+            summary += "\n" + str(failed_test) 
             if verbose_flag:
                 summary += "\n" + message
+        summary += "\n"
+    if unsupported_count > 0:
+        summary += "\nUnsupported goldens for:\n\n"
+        for unsupported_test in unsupported_tests:
+            summary += str(unsupported_test) + "\n" 
         summary += "\n"
     total_tests = pass_count + fail_count + unsupported_count
     summary += f"\nTotal tests count: {total_tests}\n"
