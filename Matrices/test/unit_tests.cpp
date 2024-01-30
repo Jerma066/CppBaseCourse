@@ -282,6 +282,32 @@ TEST(MyVector, BackPopPush) {
     EXPECT_EQ(vec.capacity(), 9);
   }
 }
+
+TEST(MyVector, Iterators) {
+  {
+    mystd::MyVector<char> vec = {'e', 'l', 'v', 'i', 's'};
+    size_t i = 0;
+    for (auto it = vec.begin(); it != vec.end(); ++it)
+      EXPECT_EQ(*it, vec[i++]);
+  }
+  {
+    mystd::MyVector<std::string> vec = {"anoter", "hello", "world"};
+    size_t i = 0;
+    for (auto elem : vec)
+      EXPECT_EQ(elem, vec[i++]);
+  }
+  {
+    mystd::MyVector<std::string> vec = {"checking", "stdlib", "find",
+                                        "function"};
+    auto it = std::find(vec.begin(), vec.end(), "find");
+    EXPECT_EQ(it != vec.end(), true);
+    EXPECT_EQ(*it, "find");
+
+    it = std::find(vec.begin(), vec.end(), "libstd");
+    EXPECT_EQ(it == vec.end(), true);
+  }
+}
+
 // ----- Matrices tests -------------------------------------------------------
 TEST(Matrix, Constructor) {
   {

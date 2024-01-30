@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <tuple>
 
 #include "myvector.hpp"
@@ -23,19 +24,18 @@ public:
     for (size_t i = 0, end = mData.size(); i < mData.size(); ++i) {
       size_t row = i;
 
-      // TODO: There is a search pattern in this for.
-      //       It can be replaced with std::find.
-      //       Itterators supportion required
-      for (size_t j = row, end = mData.size(); j < mData.size(); ++j) {
-        if (tmp[i][j] != DataType(0)) {
-          row = j;
-          break;
-        }
-      }
+      const DataType &zeroElem = DataType(0);
+      mystd::MyVector<DataType> &rowVec = tmp[i];
+      auto it = std::find_if(
+          rowVec.begin(), rowVec.end(),
+          [&zeroElem](const DataType &elem) { return elem != zeroElem; });
+      if (it != rowVec.end())
+        row = it - rowVec.begin();
 
-      std::swap(tmp[i], tmp[row]);
-      if (i != row)
+      if (i != row) {
+        std::swap(tmp[i], tmp[row]);
         inverse = !inverse;
+      }
 
       // Getting rid of all elements under current tmp[i, j];
       for (size_t j = i + 1, end = mData.size(); j < end; ++j) {
