@@ -61,6 +61,70 @@ template <typename MVType> class MyVector final : private MyVectorBuf<MVType> {
   using MyVectorBuf<MVType>::size_;
   using MyVectorBuf<MVType>::used_;
 
+  class Iterator {
+  public:
+    // Need these tags to provide introspection and conform
+    // to standard implementations of iterators.
+    using iterator_category = std::random_access_iterator_tag;
+    using difference_type = std::ptrdiff_t;
+    using value_type = MVType;
+    using pointer = value_type *;
+    using reference = value_type &;
+
+  public:
+    Iterator(pointer ptr) : ptr_(ptr) {}
+
+  public:
+    reference operator*() { return *ptr_; }
+    const reference operator*() const { return *ptr_; }
+
+    pointer operator->() { return ptr_; }
+    const pointer operator->() const { return ptr_; }
+
+    Iterator &operator++() {
+      ptr_++;
+      return *this;
+    }
+
+    Iterator operator++(int) {
+      Iterator tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    Iterator &operator+=(const difference_type diff) {
+      ptr_ += diff;
+      return *this;
+    }
+
+    Iterator &operator-=(const difference_type diff) {
+      ptr_ -= diff;
+      return *this;
+    }
+
+    Iterator operator+(const difference_type diff) const {
+      return Iterator(ptr_ + diff);
+    }
+
+    Iterator operator-(const difference_type diff) const {
+      return iterator(ptr_ - diff);
+    }
+
+    difference_type operator-(const Iterator &rhs) const {
+      return ptr_ - rhs.ptr_;
+    }
+
+    bool operator!=(const Iterator &rhs) const { return ptr_ != rhs.ptr_; }
+    bool operator==(const Iterator &rhs) const { return ptr_ == rhs.ptr_; }
+    bool operator<(const Iterator &rhs) const { return ptr_ < rhs.ptr_; }
+    bool operator>(const Iterator &rhs) const { return ptr_ > rhs.ptr_; }
+    bool operator<=(const Iterator &rhs) const { return ptr_ <= rhs.ptr_; }
+    bool operator>=(const Iterator &rhs) const { return ptr_ >= rhs.ptr_; }
+
+  private:
+    pointer ptr_ = nullptr;
+  };
+
 public:
   explicit MyVector(size_t size = 0) : MyVectorBuf<MVType>(size) {
     while (used_ < size) {
@@ -158,6 +222,9 @@ public:
 
   size_t size() const { return used_; }
   size_t capacity() const { return size_; }
+
+  Iterator begin() { return Iterator(arr_); }
+  Iterator end() { return Iterator(arr_ + used_); }
 };
 
 } // namespace mystd
