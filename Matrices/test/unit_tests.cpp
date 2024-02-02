@@ -309,18 +309,18 @@ TEST(MyVector, Iterators) {
 }
 
 // ----- Matrices tests -------------------------------------------------------
-TEST(Matrix, Constructor) {
+TEST(SqMatrix, Constructor) {
   {
-    linalg::Matrix<nums::Rational> mtr(3);
+    linalg::SqMatrix<nums::Rational> mtr(3);
     EXPECT_EQ(mtr.size(), 3);
   }
   {
     // CopyCtor
-    linalg::Matrix<nums::Rational> mtr(3);
+    linalg::SqMatrix<nums::Rational> mtr(3);
     EXPECT_EQ(mtr.size(), 3);
     mtr.mData = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
 
-    linalg::Matrix<nums::Rational> copyMtr = mtr;
+    linalg::SqMatrix<nums::Rational> copyMtr = mtr;
 
     EXPECT_EQ(copyMtr.mData[0][0], 1);
     EXPECT_EQ(copyMtr.mData[0][1], 2);
@@ -336,7 +336,7 @@ TEST(Matrix, Constructor) {
   }
   {
     size_t mSize = 3;
-    auto mtr = linalg::makeEMatrix<int>(mSize);
+    auto mtr = linalg::makeSqEMatrix<int>(mSize);
     EXPECT_EQ(mtr.size(), mSize);
     for (size_t i = 0; i < mSize; ++i) {
       for (size_t j = 0; j < mSize; ++j) {
@@ -347,9 +347,9 @@ TEST(Matrix, Constructor) {
   }
 }
 
-TEST(Matrix, SquareBracketsOperator) {
+TEST(SqMatrix, SquareBracketsOperator) {
   {
-    linalg::Matrix<nums::Rational> mtr(3);
+    linalg::SqMatrix<nums::Rational> mtr(3);
     EXPECT_EQ(mtr.size(), 3);
     mtr[1] = {3, 4, 5};
     EXPECT_EQ(mtr[1].size(), 3);
@@ -359,22 +359,22 @@ TEST(Matrix, SquareBracketsOperator) {
   }
 }
 
-TEST(Matrix, GaussDeterminant) {
+TEST(SqMatrix, GaussDeterminant) {
   {
     size_t mSize = 3;
-    auto mtr = linalg::makeEMatrix<int>(mSize);
+    auto mtr = linalg::makeSqEMatrix<int>(mSize);
     int det = mtr.GaussDet();
     EXPECT_EQ(det, 1);
   }
   {
-    linalg::Matrix<int> mtr(2);
+    linalg::SqMatrix<int> mtr(2);
     mtr[0] = {1, 1};
     mtr[1] = {1, 1};
     int det = mtr.GaussDet();
     EXPECT_EQ(det, 0);
   }
   {
-    linalg::Matrix<double> mtr(3);
+    linalg::SqMatrix<double> mtr(3);
     mtr[0] = {3, 21, 5};
     mtr[1] = {1, 8, 7};
     mtr[2] = {9, 47, 54};
@@ -382,7 +382,7 @@ TEST(Matrix, GaussDeterminant) {
     EXPECT_EQ(det, 373.0);
   }
   {
-    linalg::Matrix<nums::Rational> mtr(2);
+    linalg::SqMatrix<nums::Rational> mtr(2);
     mtr[0] = {nums::Rational(1), nums::Rational(1)};
     mtr[1] = {nums::Rational(1), nums::Rational(1)};
     nums::Rational det = mtr.GaussDet();
