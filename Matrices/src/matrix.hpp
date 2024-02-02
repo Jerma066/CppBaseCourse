@@ -8,17 +8,17 @@
 namespace linalg {
 
 // TODO: Add checkers that DataType has required operators
-template <typename DataType> struct Matrix final {
+template <typename DataType> struct SqMatrix final {
 public:
-  explicit Matrix(size_t n)
+  explicit SqMatrix(size_t n)
       : mData(mystd::MyVector<mystd::MyVector<DataType>>(
             n, mystd::MyVector<DataType>(n))) {}
 
 public:
   size_t size() const { return mData.size(); }
 
-  std::tuple<Matrix, bool> GaussElementaryTransform() const {
-    Matrix<DataType> tmp = *this;
+  std::tuple<SqMatrix, bool> GaussElementaryTransform() const {
+    SqMatrix<DataType> tmp = *this;
     bool inverse = false;
 
     for (size_t i = 0, end = mData.size(); i < mData.size(); ++i) {
@@ -50,6 +50,7 @@ public:
     return std::make_tuple(tmp, inverse);
   }
 
+  // TODO: Add size check to determine that this is square matrix
   DataType GaussDet() const {
     auto [tmpMtr, inverse] = GaussElementaryTransform();
 
@@ -71,11 +72,12 @@ public:
     return mData[i];
   }
 
+public:
   mystd::MyVector<mystd::MyVector<DataType>> mData;
 };
 
-template <typename DataType> Matrix<DataType> makeEMatrix(size_t n) {
-  Matrix<DataType> tmp(n);
+template <typename DataType> SqMatrix<DataType> makeSqEMatrix(size_t n) {
+  SqMatrix<DataType> tmp(n);
   for (size_t i = 0; i < n; ++i) {
     tmp[i] = mystd::MyVector<DataType>(n, DataType(0));
     tmp[i][i] = DataType(1);
