@@ -91,8 +91,8 @@ if __name__ == "__main__":
 
     # Read arguments from command line
     args = parser.parse_args()
-    exec_path = Path(args.executable)
-    test_root_dir = Path(args.test_dir)
+    exec_path = Path(args.executable).resolve()
+    test_root_dir = Path(args.test_dir).resolve()
     verbose_flag = args.VERBOSE
 
     if not is_exe(exec_path):
