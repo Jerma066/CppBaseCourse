@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <numeric>
 #include <tuple>
 
@@ -23,6 +24,10 @@ public:
     return (numer == rhs.numer) && (denom == rhs.denom);
   }
 
+  void dump(std::basic_ostream<char> &OS = std::cout) {
+    OS << numer << "/" << denom;
+  }
+
 public:
   operator double() const {
     return static_cast<double>(numer) / denom;
@@ -32,32 +37,14 @@ public:
   //       lower common denominator and numerator
   Rational& operator+=(const Rational& rhs) {
     long long newNumer = numer * rhs.denom + denom * rhs.numer;
-    long long commonDenom = denom * rhs.getDenominator();
+    long long commonDenom = denom * rhs.denom;
     std::tie(numer, denom) = processRationalPair(newNumer, commonDenom);
     return *this;
   }
 
-  Rational& operator-=(const Rational& rhs) {
-    long long newNumer = numer * rhs.denom - denom * rhs.numer;
-    long long commonDenom = denom * rhs.getDenominator();
-    std::tie(numer, denom) = processRationalPair(newNumer, commonDenom);
-    return *this;
-  }
-
-  Rational& operator*=(const Rational& rhs) {
-    long long newNumer = numer * rhs.numer; 
-    long long newDenom = denom * rhs.denom;
-    std::tie(numer, denom) = processRationalPair(newNumer, newDenom);
-    return *this;
-  }
-
-  Rational& operator/=(const Rational& rhs) {
-    // TODO: Zero rhs should be handled
-    long long newNumer = numer * rhs.denom;
-    long long newDenom = denom * rhs.numer;
-    std::tie(numer, denom) = processRationalPair(newNumer, newDenom);
-    return *this;
-  }
+  Rational &operator-=(const Rational &rhs);
+  Rational &operator*=(const Rational &rhs);
+  Rational &operator/=(const Rational &rhs);
 
 private:
 	long long numer;
@@ -65,6 +52,9 @@ private:
 };
 
 } // namespace nums
+
+std::basic_ostream<char> &operator<<(std::basic_ostream<char> &OS,
+                                     nums::Rational &rnum);
 
 // Binary operators
 nums::Rational operator+(const nums::Rational& lhs,

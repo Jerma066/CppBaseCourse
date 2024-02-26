@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <iostream>
 #include <tuple>
 
 #include "myvector.hpp"
@@ -29,18 +30,20 @@ public:
       auto it = std::find_if(
           rowVec.begin(), rowVec.end(),
           [&zeroElem](const DataType &elem) { return elem != zeroElem; });
-      if (it != rowVec.end())
-        row = it - rowVec.begin();
 
-      if (i != row) {
-        std::swap(tmp[i], tmp[row]);
-        inverse = !inverse;
+      if (it != rowVec.end()) {
+        size_t row = it - rowVec.begin();
+        if (row != i) {
+          std::swap(tmp[i], tmp[row]);
+          inverse = !inverse;
+        }
       }
 
-      // Getting rid of all elements under current tmp[i, j];
+      // Getting rid of all elements under current tmp[i, i];
       for (size_t j = i + 1, end = mData.size(); j < end; ++j) {
-        if (tmp[j][i] == DataType(0))
+        if (tmp[j][i] == zeroElem)
           continue;
+
         DataType q = tmp[j][i] / tmp[i][i];
         for (size_t k = i, end = mData.size(); k < end; ++k)
           tmp[j][k] -= q * tmp[i][k];
@@ -54,14 +57,20 @@ public:
   DataType GaussDet() const {
     auto [tmpMtr, inverse] = GaussElementaryTransform();
 
-    DataType det(1);
-    if (inverse)
-      det = -det;
-
+    DataType det(inverse ? -1 : 1);
     for (size_t i = 0, end = mData.size(); i < end; ++i)
       det *= tmpMtr[i][i];
 
     return det;
+  }
+
+  void dump(std::basic_ostream<char> &OS = std::cout) {
+    for (auto &vec : mData) {
+      for (auto &elem : vec) {
+        OS << elem << ' ';
+      }
+      OS << '\n';
+    }
   }
 
 public:

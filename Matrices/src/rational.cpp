@@ -22,7 +22,54 @@ std::tuple<long long, long long>
   return std::make_tuple(numerator / divisor, denominator / divisor);
 };
 
+Rational &Rational::operator-=(const Rational &rhs) {
+  long long nngcd = std::gcd(numer, rhs.numer);
+  nngcd = (nngcd == 0) ? 1 : nngcd;
+  long long ddgcd = std::gcd(denom, rhs.denom);
+
+  long long newNumer = (numer / nngcd) * (rhs.denom / ddgcd) -
+                       (denom / ddgcd) * (rhs.numer / nngcd);
+  long long commonDenom = (denom / ddgcd) * (rhs.denom / ddgcd);
+
+  long long newGcd = std::gcd(newNumer, commonDenom);
+  newNumer /= newGcd;
+  commonDenom /= newGcd;
+
+  std::tie(numer, denom) =
+      processRationalPair(newNumer * nngcd, commonDenom * ddgcd);
+  return *this;
+}
+
+Rational &Rational::operator*=(const Rational &rhs) {
+  long long ndGcd = std::gcd(numer, rhs.denom);
+  long long dnGcd = std::gcd(denom, rhs.numer);
+
+  long long newNumer = (numer / ndGcd) * (rhs.numer / dnGcd);
+  long long newDenom = (denom / dnGcd) * (rhs.denom / ndGcd);
+
+  std::tie(numer, denom) = processRationalPair(newNumer, newDenom);
+  return *this;
+}
+
+Rational &Rational::operator/=(const Rational &rhs) {
+  // TODO: Zero rhs should be handled
+  long long nnGcd = std::gcd(numer, rhs.numer);
+  long long ddGcd = std::gcd(denom, rhs.denom);
+
+  long long newNumer = (numer / nnGcd) * (rhs.denom / ddGcd);
+  long long newDenom = (denom / ddGcd) * (rhs.numer / nnGcd);
+
+  std::tie(numer, denom) = processRationalPair(newNumer, newDenom);
+  return *this;
+}
+
 } // namespace nums
+
+std::basic_ostream<char> &operator<<(std::basic_ostream<char> &OS,
+                                     nums::Rational &rnum) {
+  rnum.dump(OS);
+  return OS;
+}
 
 // Binary operators
 nums::Rational operator+(const nums::Rational& lhs,

@@ -170,6 +170,26 @@ TEST(Rational, Equality) {
   }
 }
 
+TEST(Rational, FullArithmetic) {
+  {
+    nums::Rational a(-894618, 39631);
+    nums::Rational b(9555007, 356679);
+    nums::Rational q = b / a;
+    nums::Rational qRes(-9555007, 8051562);
+    EXPECT_EQ(q == qRes, true);
+
+    nums::Rational c(18252251, 158524);
+    nums::Rational qc = qRes * c;
+    nums::Rational qcRes(-174400386070757, 1276365814488);
+    EXPECT_EQ(qc == qcRes, true);
+
+    nums::Rational d(-80360575, 713358);
+    nums::Rational dMinQc = d - qc;
+    nums::Rational dMinQcRes(772535447, 32206248);
+    EXPECT_EQ(dMinQc == dMinQcRes, true);
+  }
+}
+
 // ----- MyVector tests -------------------------------------------------------
 TEST(MyVector, Constructor) {
   {
