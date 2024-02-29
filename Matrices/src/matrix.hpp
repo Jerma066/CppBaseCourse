@@ -45,7 +45,8 @@ public:
           continue;
 
         DataType q = tmp[j][i] / tmp[i][i];
-        for (size_t k = i, end = mData.size(); k < end; ++k)
+        tmp[j][i] = 0;
+        for (size_t k = i + 1, end = mData.size(); k < end; ++k)
           tmp[j][k] -= q * tmp[i][k];
       }
     }
@@ -56,7 +57,8 @@ public:
   // TODO: Add size check to determine that this is square matrix
   DataType GaussDet() const {
     auto [tmpMtr, inverse] = GaussElementaryTransform();
-
+    // tmpMtr.dump();
+    // std::cout << std::endl;
     DataType det(inverse ? -1 : 1);
     for (size_t i = 0, end = mData.size(); i < end; ++i)
       det *= tmpMtr[i][i];
