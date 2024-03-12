@@ -25,5 +25,7 @@ int main() {
   // rounding by the first character
   double detRes = std::round(mtr.GaussDet() * 10) / 10;
   std::cout << detRes << std::endl;
+
+  // std::cout << mtr.GaussDet() << std::endl;
   return 0;
 }

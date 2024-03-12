@@ -41,6 +41,7 @@ Rational &Rational::operator-=(const Rational &rhs) {
 }
 
 Rational &Rational::operator*=(const Rational &rhs) {
+  // TODO: ndGcd and dnGcd should be checked with equality to zero
   long long ndGcd = std::gcd(numer, rhs.denom);
   long long dnGcd = std::gcd(denom, rhs.numer);
 
@@ -53,6 +54,7 @@ Rational &Rational::operator*=(const Rational &rhs) {
 
 Rational &Rational::operator/=(const Rational &rhs) {
   // TODO: Zero rhs should be handled
+  // TODO: nnGcd should be checked with equality to zero
   long long nnGcd = std::gcd(numer, rhs.numer);
   long long ddGcd = std::gcd(denom, rhs.denom);
 

@@ -18,24 +18,30 @@ public:
 public:
   size_t size() const { return mData.size(); }
 
+  // TODO: Maybe it will be better to delete this unused function
+  /*
   std::tuple<SqMatrix, bool> GaussElementaryTransform() const {
     SqMatrix<DataType> tmp = *this;
     bool inverse = false;
 
     for (size_t i = 0, end = mData.size(); i < mData.size(); ++i) {
-      size_t row = i;
+      // Matrix dump
+      // tmp.dump();
 
       const DataType &zeroElem = DataType(0);
-      mystd::MyVector<DataType> &rowVec = tmp[i];
-      auto it = std::find_if(
-          rowVec.begin(), rowVec.end(),
-          [&zeroElem](const DataType &elem) { return elem != zeroElem; });
+      if (tmp[i][i] == zeroElem) {
+        auto it = std::find_if(
+            tmp.mData.begin() + i, tmp.mData.end(),
+            [i, &zeroElem](const mystd::MyVector<DataType> &rowVec) {
+              return rowVec[i] != zeroElem;
+            });
 
-      if (it != rowVec.end()) {
-        size_t row = it - rowVec.begin();
-        if (row != i) {
-          std::swap(tmp[i], tmp[row]);
-          inverse = !inverse;
+        if (it != tmp.mData.end()) {
+          size_t col = it - tmp.mData.begin();
+          if (col != i) {
+            std::swap(tmp[i], tmp[col]);
+            inverse = !inverse;
+          }
         }
       }
 
@@ -53,15 +59,50 @@ public:
 
     return std::make_tuple(tmp, inverse);
   }
+  */
 
   // TODO: Add size check to determine that this is square matrix
   DataType GaussDet() const {
-    auto [tmpMtr, inverse] = GaussElementaryTransform();
-    // tmpMtr.dump();
-    // std::cout << std::endl;
+    // Gauss transform
+    SqMatrix<DataType> tmp = *this;
+    bool inverse = false;
+    for (size_t i = 0, end = mData.size(); i < end; ++i) {
+      const DataType &zeroElem = DataType(0);
+      if (tmp[i][i] == zeroElem) {
+        // Searching for non-zero elements in columns
+        // TODO: This code contains searching pattern
+        //       and can be replced with std::find but
+        //       brute implementation seems more readable
+        size_t row = i;
+        for (size_t j = i + 1, end = tmp.size(); j < end; ++j) {
+          if (tmp[j][i] != zeroElem) {
+            std::swap(tmp[j], tmp[row]);
+            inverse = !inverse;
+            break;
+          }
+        }
+      }
+
+      // If there was no non-zero rows -> det = 0
+      if (tmp[i][i] == zeroElem)
+        return DataType(0);
+
+      // Getting rid of all elements under current tmp[i, i];
+      for (size_t j = i + 1, end = mData.size(); j < end; ++j) {
+        if (tmp[j][i] == zeroElem)
+          continue;
+
+        DataType q = tmp[j][i] / tmp[i][i];
+        tmp[j][i] = 0;
+        for (size_t k = i + 1, end = mData.size(); k < end; ++k)
+          tmp[j][k] -= q * tmp[i][k];
+      }
+    }
+
+    // Determinant counting
     DataType det(inverse ? -1 : 1);
     for (size_t i = 0, end = mData.size(); i < end; ++i)
-      det *= tmpMtr[i][i];
+      det *= tmp[i][i];
 
     return det;
   }
@@ -73,6 +114,7 @@ public:
       }
       OS << '\n';
     }
+    OS << '\n';
   }
 
 public:
