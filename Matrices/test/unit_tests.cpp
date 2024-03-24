@@ -190,6 +190,16 @@ TEST(Rational, FullArithmetic) {
   }
 }
 
+TEST(Rational, StdAbs) {
+  {
+    nums::Rational rNum(-1, 10);
+    nums::Rational absRNum = std::abs(rNum);
+    nums::Rational res(1, 10);
+    // std::cout << rNum << "; while res: " << res << std::endl;
+    EXPECT_EQ(absRNum == res, true);
+  }
+}
+
 // ----- MyVector tests -------------------------------------------------------
 TEST(MyVector, Constructor) {
   {

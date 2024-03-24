@@ -54,8 +54,7 @@ protected:
   size_t used_;
 };
 
-// TODO: Add class Iterator to support range-based for loops;
-//       Add constructor with default value;
+// TODO: Support swap, clear, cbegin, cend.
 template <typename MVType> class MyVector final : private MyVectorBuf<MVType> {
   using MyVectorBuf<MVType>::arr_;
   using MyVectorBuf<MVType>::size_;

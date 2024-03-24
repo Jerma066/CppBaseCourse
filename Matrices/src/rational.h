@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <iostream>
 #include <numeric>
 #include <tuple>
@@ -74,3 +75,10 @@ nums::Rational operator==(const nums::Rational& lhs,
 
 nums::Rational operator!=(const nums::Rational& lhs,
                           const nums::Rational& rhs);
+
+// TODO: Ugly hack to use std::abs for custom calss in my Matrix
+namespace std {
+
+nums::Rational abs(const nums::Rational &ratNum);
+
+}
