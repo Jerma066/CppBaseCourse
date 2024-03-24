@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <iomanip>
 #include <iostream>
 #include <tuple>
 
@@ -66,16 +67,23 @@ public:
     // Gauss transform
     SqMatrix<DataType> tmp = *this;
     bool inverse = false;
+    // TODO: This hotfix to check if the element equal to zero
+    //       Double and float data elements requires additional
+    //       check of equality to minus zero
+
     for (size_t i = 0, end = mData.size(); i < end; ++i) {
+      // tmp.dump();
+
+      const DataType &Epsilon = 1e-12;
       const DataType &zeroElem = DataType(0);
-      if (tmp[i][i] == zeroElem) {
+      if (std::abs(tmp[i][i]) <= Epsilon) {
         // Searching for non-zero elements in columns
         // TODO: This code contains searching pattern
         //       and can be replced with std::find but
         //       brute implementation seems more readable
         size_t row = i;
-        for (size_t j = i + 1, end = tmp.size(); j < end; ++j) {
-          if (tmp[j][i] != zeroElem) {
+        for (size_t j = i + 1, sz = tmp.size(); j < sz; ++j) {
+          if (!(std::abs(tmp[j][i]) <= Epsilon)) {
             std::swap(tmp[j], tmp[row]);
             inverse = !inverse;
             break;
@@ -84,12 +92,12 @@ public:
       }
 
       // If there was no non-zero rows -> det = 0
-      if (tmp[i][i] == zeroElem)
+      if (std::abs(tmp[i][i]) <= Epsilon)
         return DataType(0);
 
       // Getting rid of all elements under current tmp[i, i];
       for (size_t j = i + 1, end = mData.size(); j < end; ++j) {
-        if (tmp[j][i] == zeroElem)
+        if (std::abs(tmp[j][i]) <= Epsilon)
           continue;
 
         DataType q = tmp[j][i] / tmp[i][i];
@@ -108,10 +116,12 @@ public:
   }
 
   void dump(std::basic_ostream<char> &OS = std::cout) {
+    // OS << std::fixed << std::setw(2) << std::setprecision(2) <<
+    // std::setfill('0');
     for (auto &vec : mData) {
-      for (auto &elem : vec) {
+      for (auto &elem : vec)
         OS << elem << ' ';
-      }
+
       OS << '\n';
     }
     OS << '\n';

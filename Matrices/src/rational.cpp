@@ -112,3 +112,8 @@ nums::Rational operator!=(const nums::Rational& lhs,
   return !lhs.equal(rhs);
 }
 
+// TODO: Ugly hack to use std::abs for custom calss in my Matrix
+nums::Rational std::abs(const nums::Rational &ratNum) {
+  nums::Rational res(std::abs(ratNum.getNumerator()), ratNum.getDenominator());
+  return res;
+}
