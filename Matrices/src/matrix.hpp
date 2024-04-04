@@ -19,48 +19,6 @@ public:
 public:
   size_t size() const { return mData.size(); }
 
-  #if 0
-  std::tuple<SqMatrix, bool> GaussElementaryTransform() const {
-    SqMatrix<DataType> tmp = *this;
-    bool inverse = false;
-
-    for (size_t i = 0, end = mData.size(); i < mData.size(); ++i) {
-      // Matrix dump
-      // tmp.dump();
-
-      const DataType &zeroElem = DataType(0);
-      if (tmp[i][i] == zeroElem) {
-        auto it = std::find_if(
-            tmp.mData.begin() + i, tmp.mData.end(),
-            [i, &zeroElem](const mystd::MyVector<DataType> &rowVec) {
-              return rowVec[i] != zeroElem;
-            });
-
-        if (it != tmp.mData.end()) {
-          size_t col = it - tmp.mData.begin();
-          if (col != i) {
-            std::swap(tmp[i], tmp[col]);
-            inverse = !inverse;
-          }
-        }
-      }
-
-      // Getting rid of all elements under current tmp[i, i];
-      for (size_t j = i + 1, end = mData.size(); j < end; ++j) {
-        if (tmp[j][i] == zeroElem)
-          continue;
-
-        DataType q = tmp[j][i] / tmp[i][i];
-        tmp[j][i] = 0;
-        for (size_t k = i + 1, end = mData.size(); k < end; ++k)
-          tmp[j][k] -= q * tmp[i][k];
-      }
-    }
-
-    return std::make_tuple(tmp, inverse);
-  }
-  #endif
-
   // TODO: Add size check to determine that this is square matrix
   DataType GaussDet() const {
     // Gauss transform
@@ -108,8 +66,6 @@ public:
   }
 
   void dump(std::basic_ostream<char> &OS = std::cout) {
-    // OS << std::fixed << std::setw(2) << std::setprecision(2) <<
-    // std::setfill('0');
     for (auto &vec : mData) {
       for (auto &elem : vec)
         OS << elem << ' ';
