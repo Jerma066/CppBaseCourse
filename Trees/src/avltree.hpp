@@ -27,15 +27,20 @@ private:
 public:
   void insert(VType newVal) {
     auto newNode = std::make_shared<Node>(newVal, std::weak_ptr<Node>());
-    insertNode(newNode);
+    // STEP 1: Inserting as in BST
+    bool needRebalancing = insertNode(newNode);
+
+    if (needRebalancing) {
+      // STEP 2: Height calculating
+      upStreamHeightRecalc(newNode);
+
+      // STEP 3: Tree balancing
+      rebalanceTree(newNode->parent.lock());
+    }
   }
 
 private:
-  void insertNode(std::shared_ptr<Node> newNode) {
-    // TODO: Maybe the following step shoub be wraped in function
-    //       Or All steps should be moved as separetes function
-    //       to insert function above
-    // STEP 1: Inserting as in BST
+  bool insertNode(std::shared_ptr<Node> newNode) {
     // Searching for the insert position
     std::shared_ptr<Node> curNode = root_;
     std::shared_ptr<Node> newParentNode = nullptr;
@@ -45,30 +50,30 @@ private:
           (newNode->value < curNode->value) ? curNode->left : curNode->right;
     }
 
-    // Checking if such value already in tree
-    if (newParentNode && (newParentNode->value == newNode->value))
-      return;
+    // Checking if Node can be inserted (such value already in tree)
+    if (newParentNode && (newParentNode->value == newNode->value)) {
+      // No insertion - no rebalancing required
+      return false;
+    }
 
     // Inserting node to the position
     newNode->parent = newParentNode;
     if (!newParentNode) {
-      // Empty tree case
+      // Empty tree case - no rebalancing required
       root_ = newNode;
-      return;
+      return false;
     } else if (newNode->value < newParentNode->value) {
       newParentNode->left = newNode;
     } else {
       newParentNode->right = newNode;
     }
 
-    // STEP 2: Height calculating
-    upStreamHeightRecalc(newNode);
-
-    // STEP 3: Tree balancing
-    rebalanceTree(newNode->parent.lock());
+    // Rebalancing required
+    return true;
   }
 
   void upStreamHeightRecalc(std::shared_ptr<Node> startNode) {
+    // Recursion cycle
     auto curNode = startNode;
     while (curNode && curNode->parent.lock()) {
       if (curNode->parent.lock()->height == curNode->height) {
@@ -81,46 +86,55 @@ private:
     }
   }
 
-  // TODO: Get rid of recursion
   void rebalanceTree(std::shared_ptr<Node> rotatedNode) {
-    if (!rotatedNode)
-      return;
+    // TODO: Check if recursion cycle is required.
+    // TODO: Check if heights should be recalculated.
+    // Recursion cycle
+    while (rotatedNode) {
+      std::shared_ptr<Node> oldParent = rotatedNode->parent.lock();
 
-    std::shared_ptr<Node> oldParent = rotatedNode->parent.lock();
-    int bFactor = rotatedNode->balanceFactor();
-    // TODO: Need comment
-    // TODO: Use bool variables for complex if clauses
-    if (bFactor > 1) {
-      if (rotatedNode->right && rotatedNode->right->left &&
-          (rotatedNode->right->left->left || rotatedNode->right->left->right)) {
-        rightRotate(rotatedNode->right);
+      // Tree rotations are required only if balance factor modulo is greater
+      // than 1
+      int bFactor = rotatedNode->balanceFactor();
+      if (bFactor > 1) {
+        // Right sub-tree has greater height,
+        // left or right-left rotation required
+        bool needRightRotate =
+            rotatedNode->left && rotatedNode->left->balanceFactor() < 0;
+        if (needRightRotate)
+          rightRotate(rotatedNode->right);
+        leftRotate(rotatedNode);
+      } else if (bFactor < -1) {
+        // Left sub-tree has greater height
+        // right or left-right rotation required
+        bool needLeftRotate =
+            rotatedNode->right && rotatedNode->right->balanceFactor() > 0;
+        if (needLeftRotate)
+          leftRotate(rotatedNode->left);
+        rightRotate(rotatedNode);
       }
-      leftRotate(rotatedNode);
-    } else if (bFactor < -1) {
-      if (rotatedNode->left && rotatedNode->left->right &&
-          (rotatedNode->left->right->left || rotatedNode->left->right->right)) {
-        // TODO: Check the argument of leftRotate function
-        leftRotate(rotatedNode->left);
-      }
-      rightRotate(rotatedNode);
+
+      rotatedNode = oldParent;
     }
-
-    // TODO: Use cycle instead of recursion
-    rebalanceTree(oldParent);
   }
 
   /*
-    bls - b left subtree
-    als - a left subtree
+    Left rotation around a-node example:
 
-      a                 b
-     / \               / \
-   als  b      =>    a     c
-       / \          / \   / \
-     bls  c       als bls
-         / \
+         apt               apt
+          |                 |
+          a                 b
+         / \               / \
+       als  b      =>    a     c
+           / \          / \   / \
+         bls  c       als bls
+             / \
+
+      bls - b left subtree
+      als - a left subtree
+      apt - a parent
   */
-  // Central Node is a; Right Child is b
+  // Central Node is a; Right Child is b; Parent is apt
   void leftRotate(std::shared_ptr<Node> centralNode) {
     if (!centralNode || !root_)
       return;
@@ -132,17 +146,42 @@ private:
     if (!rightChild)
       return;
 
-    // TODO: need comments
+    // Renewing root_ variable if required
     if (centralNode == root_)
       root_ = rightChild;
+
+    // Binding nodes during rotation:
+    /*
+             a
+            / \
+        (same) bls
+
+        The result is a-sub-tree, which will be denoted below as ast
+    */
     centralNode->parent = rightChild;
     centralNode->right = rightChild->left;
-
     if (rightChild->left)
       rightChild->left->parent = centralNode;
+
+    // Binding nodes during rotation:
+    /*
+          apt
+           |
+           b
+          / \
+        ast (same)
+
+        The result is b-sub-tree, which will be denoted below as bst
+    */
     rightChild->left = centralNode;
     rightChild->parent = parent;
 
+    // Binding node during rotation:
+    /*
+         apt          apt
+         /      OR      \
+       bst              bst
+    */
     if (parent) {
       if (parent->left == centralNode)
         parent->left = rightChild;
@@ -152,6 +191,7 @@ private:
   }
 
   void rightRotate(std::shared_ptr<Node> centralNode) {
+    // Same as leftRotate, but symmetrically
     if (!centralNode || !root_)
       return;
 
@@ -163,11 +203,12 @@ private:
 
     if (centralNode == root_)
       root_ = leftChild;
+
     centralNode->parent = leftChild;
     centralNode->left = leftChild->right;
-
     if (leftChild->right)
       leftChild->right->parent = centralNode;
+
     leftChild->right = centralNode;
     leftChild->parent = parent;
 
@@ -180,6 +221,7 @@ private:
   }
 
 public:
+  // Functionality required for tests
   std::vector<VType> getBfsTravers() {
     std::vector<VType> output;
 
@@ -199,6 +241,29 @@ public:
     }
 
     return output;
+  }
+
+  // Heavy recursion function for checking the balance of the tree
+  bool isBalanced() {
+    if (!root_)
+      return true;
+
+    return dummyBruteHeight(root_) != -1;
+  }
+
+private:
+  // Heavy recursion function for checking the balance of the tree
+  bool dummyBruteHeight(std::shared_ptr<Node> curNode) {
+    if (curNode)
+      return 0;
+
+    int ldbh = dummyBruteHeight(curNode->left);
+    int rdbh = dummyBruteHeight(curNode->right);
+
+    if (ldbh == -1 || rdbh == -1 || abs(ldbh - rdbh) > 1)
+      return -1;
+
+    return 1 + std::max(ldbh, rdbh);
   }
 
 private:
