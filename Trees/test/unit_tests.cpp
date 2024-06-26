@@ -62,6 +62,7 @@ TEST(AVLTree, Rebalance) {
     EXPECT_EQ(values[0], 4);
     EXPECT_EQ(values[1], 3);
     EXPECT_EQ(values[2], 5);
+    EXPECT_EQ(avlTree.isBalanced(), true);
   }
 
   {
@@ -75,6 +76,7 @@ TEST(AVLTree, Rebalance) {
     EXPECT_EQ(values[0], 4);
     EXPECT_EQ(values[1], 3);
     EXPECT_EQ(values[2], 5);
+    EXPECT_EQ(avlTree.isBalanced(), true);
   }
 
   {
@@ -90,6 +92,7 @@ TEST(AVLTree, Rebalance) {
     EXPECT_EQ(values[1], 3);
     EXPECT_EQ(values[2], 5);
     EXPECT_EQ(values[3], 2);
+    EXPECT_EQ(avlTree.isBalanced(), true);
 
     avlTree.insert(5);
     avlTree.insert(3);
@@ -99,6 +102,33 @@ TEST(AVLTree, Rebalance) {
     EXPECT_EQ(values[1], 3);
     EXPECT_EQ(values[2], 5);
     EXPECT_EQ(values[3], 2);
+    EXPECT_EQ(avlTree.isBalanced(), true);
+  }
+
+  {
+    std::vector<int> randomValues = {
+        35, 48, 83, 61, 1,  69, 45, 20, 31, 68, 41, 56, 75, 22, 34, 74, 72, 27,
+        79, 63, 44, 9,  40, 26, 12, 42, 81, 88, 10, 87, 84, 52, 67, 73, 46, 76,
+        24, 53, 14, 8,  78, 80, 55, 4,  38, 3,  28, 62, 32, 47, 29, 51, 11, 30,
+        71, 15, 37, 59, 60, 70, 49, 5,  36, 17, 39, 43, 13, 18, 66, 58, 77, 54,
+        89, 6,  19, 65, 57, 50, 86, 23, 16, 7,  2,  33, 25, 90, 82, 21, 85, 64};
+
+    tree::AVL<int> avlTree;
+    for (auto val : randomValues)
+      avlTree.insert(val);
+
+    EXPECT_EQ(avlTree.isBalanced(), true);
+  }
+
+  {
+    std::vector<int> randomValues = {13, 20, 18, 24, 11, 1,  8, 3, 17,
+                                     19, 10, 14, 5,  12, 25, 4, 6, 9,
+                                     7,  21, 23, 15, 22, 16, 2};
+    tree::AVL<int> avlTree;
+    for (auto val : randomValues) {
+      avlTree.insert(val);
+      EXPECT_EQ(avlTree.isBalanced(), true);
+    }
   }
 }
 
