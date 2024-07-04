@@ -132,6 +132,171 @@ TEST(AVLTree, Rebalance) {
   }
 }
 
+TEST(AVLTree, LowerBound) {
+  {
+    tree::AVL<int> avlTree;
+    avlTree.insert(1);
+    avlTree.insert(2);
+    avlTree.insert(3);
+    avlTree.insert(4);
+    avlTree.insert(5);
+    auto resIter = avlTree.lower_bound(3);
+    EXPECT_EQ(resIter->value, 3);
+  }
+
+  {
+    tree::AVL<int> avlTree;
+    avlTree.insert(-3);
+    avlTree.insert(-2);
+    avlTree.insert(-1);
+    avlTree.insert(0);
+    auto resIter = avlTree.lower_bound(0);
+    EXPECT_EQ(resIter->value, 0);
+
+    auto checkIter = avlTree.begin();
+    for (size_t i = 0; i < 3; ++i)
+      checkIter++;
+    EXPECT_EQ(resIter->value, checkIter->value);
+    EXPECT_EQ(resIter, checkIter);
+  }
+
+  {
+    tree::AVL<int> avlTree;
+    avlTree.insert(100);
+    avlTree.insert(200);
+    avlTree.insert(300);
+    avlTree.insert(400);
+
+    auto resIter = avlTree.lower_bound(500);
+    EXPECT_EQ(resIter, avlTree.end());
+
+    resIter = avlTree.lower_bound(50);
+    EXPECT_EQ(resIter, avlTree.begin());
+
+    resIter = avlTree.lower_bound(200);
+    auto checkIter = avlTree.begin();
+    EXPECT_EQ(resIter, ++checkIter);
+  }
+}
+
+TEST(AVLTree, UpperBound) {
+  {
+    tree::AVL<int> avlTree;
+    avlTree.insert(1);
+    avlTree.insert(2);
+    avlTree.insert(3);
+    avlTree.insert(4);
+    avlTree.insert(5);
+    auto resIter = avlTree.upper_bound(3);
+    EXPECT_EQ(resIter->value, 4);
+  }
+
+  {
+    tree::AVL<int> avlTree;
+    avlTree.insert(-3);
+    avlTree.insert(-2);
+    avlTree.insert(-1);
+    avlTree.insert(0);
+    auto resIter = avlTree.upper_bound(0);
+    EXPECT_EQ(resIter, avlTree.end());
+  }
+
+  {
+    tree::AVL<int> avlTree;
+    avlTree.insert(100);
+    avlTree.insert(200);
+    avlTree.insert(300);
+    avlTree.insert(400);
+
+    auto resIter = avlTree.upper_bound(500);
+    EXPECT_EQ(resIter, avlTree.end());
+
+    resIter = avlTree.upper_bound(300);
+    EXPECT_EQ(resIter != avlTree.end(), true);
+    EXPECT_EQ(resIter->value, 400);
+
+    resIter = avlTree.upper_bound(100);
+    auto checkIter = avlTree.begin();
+    EXPECT_EQ(resIter, ++checkIter);
+  }
+}
+
+TEST(AVLTree, Find) {
+  {
+    tree::AVL<int> avlTree;
+    avlTree.insert(1);
+    avlTree.insert(2);
+    avlTree.insert(3);
+    avlTree.insert(4);
+    avlTree.insert(5);
+    auto resIter = avlTree.find(3);
+    EXPECT_EQ(resIter != avlTree.end(), true);
+    EXPECT_EQ(avlTree.find(3), avlTree.lower_bound(3));
+  }
+
+  {
+    tree::AVL<int> avlTree;
+    avlTree.insert(-3);
+    avlTree.insert(-2);
+    avlTree.insert(-1);
+    avlTree.insert(0);
+
+    auto resIter = avlTree.find(0);
+    EXPECT_EQ(resIter != avlTree.end(), true);
+    EXPECT_EQ(resIter->value, 0);
+    EXPECT_EQ(resIter, avlTree.lower_bound(0));
+    EXPECT_EQ(resIter, avlTree.upper_bound(-1));
+  }
+
+  {
+    tree::AVL<int> avlTree;
+    avlTree.insert(100);
+    avlTree.insert(200);
+    avlTree.insert(300);
+    avlTree.insert(400);
+
+    auto resIter = avlTree.find(500);
+    EXPECT_EQ(resIter, avlTree.end());
+
+    resIter = avlTree.lower_bound(300);
+    EXPECT_EQ(resIter != avlTree.end(), true);
+    EXPECT_EQ(resIter->value, 300);
+  }
+}
+
+TEST(AVLTree, BruteRangeQuerieCount) {
+  tree::AVL<int> avlTree;
+  avlTree.insert(10);
+  avlTree.insert(20);
+  avlTree.insert(30);
+  avlTree.insert(40);
+  avlTree.insert(50);
+
+  EXPECT_EQ(avlTree.getRangeQuerieCount(29, 41), 2);
+  EXPECT_EQ(avlTree.getRangeQuerieCount(40, 50), 2);
+  EXPECT_EQ(avlTree.getRangeQuerieCount(39, 50), 2);
+  EXPECT_EQ(avlTree.getRangeQuerieCount(41, 50), 1);
+  EXPECT_EQ(avlTree.getRangeQuerieCount(41, 51), 1);
+  EXPECT_EQ(avlTree.getRangeQuerieCount(39, 51), 2);
+  EXPECT_EQ(avlTree.getRangeQuerieCount(40, 41), 1);
+  EXPECT_EQ(avlTree.getRangeQuerieCount(50, 51), 1);
+  EXPECT_EQ(avlTree.getRangeQuerieCount(10, 20), 2);
+  EXPECT_EQ(avlTree.getRangeQuerieCount(20, 30), 2);
+  EXPECT_EQ(avlTree.getRangeQuerieCount(29, 31), 1);
+  EXPECT_EQ(avlTree.getRangeQuerieCount(49, 51), 1);
+  EXPECT_EQ(avlTree.getRangeQuerieCount(9, 11), 1);
+
+  EXPECT_EQ(avlTree.getRangeQuerieCount(10, 10), 1);
+  EXPECT_EQ(avlTree.getRangeQuerieCount(20, 20), 1);
+  EXPECT_EQ(avlTree.getRangeQuerieCount(30, 30), 1);
+  EXPECT_EQ(avlTree.getRangeQuerieCount(40, 40), 1);
+
+  EXPECT_EQ(avlTree.getRangeQuerieCount(7, 7), 0);
+  EXPECT_EQ(avlTree.getRangeQuerieCount(31, 31), 0);
+  EXPECT_EQ(avlTree.getRangeQuerieCount(101, 101), 0);
+  EXPECT_EQ(avlTree.getRangeQuerieCount(30, 10), 3);
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
 

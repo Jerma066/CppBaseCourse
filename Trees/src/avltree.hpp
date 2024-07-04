@@ -1,13 +1,16 @@
 #pragma once
 
+#include <cstdlib>
 #include <memory>
 #include <queue>  // Only for bfs travers
 #include <vector> // Only for bfs travers
 
 namespace tree {
 
+// TODO: Add constructor with initializer list
 template <typename VType> class AVL final {
 private:
+  // Node description
   struct Node final {
     Node(int value, std::weak_ptr<Node> parent)
         : value(value), parent(parent) {}
@@ -25,7 +28,145 @@ private:
     int height = 0;
   };
 
+private:
+  class Iterator final {
+    // TODO: Should be bidirectional.
+    //       Support all required methods.
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = VType;
+    using difference_type = std::ptrdiff_t;
+    using pointer = VType *;
+    using reference = VType &;
+
+  public:
+    explicit Iterator(std::shared_ptr<Node> node) : iterableNode(node) {}
+
+    std::shared_ptr<Node> operator->() { return iterableNode; }
+
+    bool operator==(const Iterator &other) const {
+      return iterableNode == other.iterableNode;
+    }
+
+    bool operator!=(const Iterator &other) const {
+      return iterableNode != other.iterableNode;
+    }
+
+    Iterator &operator++() {
+      if (iterableNode->right != nullptr) {
+        iterableNode = iterableNode->right;
+        while (iterableNode->left != nullptr)
+          iterableNode = iterableNode->left;
+
+        return *this;
+      } else {
+        // TODO: Use one return statement by uniting all if statements
+        //       in one if-elseif-else statement
+
+        if (!iterableNode->parent.lock()) {
+          iterableNode = iterableNode->parent.lock();
+          return *this;
+        }
+
+        bool isLeftChild = iterableNode->parent.lock()->left == iterableNode;
+        if (isLeftChild) {
+          iterableNode = iterableNode->parent.lock();
+          return *this;
+        } else {
+          // Node is right child case:
+          iterableNode = iterableNode->parent.lock();
+          while (iterableNode->parent.lock() &&
+                 iterableNode != iterableNode->parent.lock()->left)
+            iterableNode = iterableNode->parent.lock();
+
+          iterableNode = iterableNode->parent.lock();
+          return *this;
+        }
+      }
+    }
+
+    Iterator operator++(int) {
+      Iterator tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+  private:
+    std::shared_ptr<Node> iterableNode;
+  };
+
 public:
+  // TODO: Memoization of left-most node is required
+  Iterator begin() {
+    std::shared_ptr<Node> curNode = root_;
+    while (curNode->left)
+      curNode = curNode->left;
+
+    return Iterator(curNode);
+  }
+
+  Iterator end() { return Iterator(nullptr); }
+
+public:
+  // TODO: How to transfer argument to the following 3 functions
+  Iterator find(VType target) {
+    std::shared_ptr<Node> curNode = root_;
+    while (curNode && curNode->value != target) {
+      curNode = (curNode->value > target) ? curNode->left : curNode->right;
+    }
+
+    return Iterator{curNode};
+  }
+
+  Iterator lower_bound(VType target) {
+    std::shared_ptr<Node> curNode = root_;
+    std::shared_ptr<Node> res = nullptr;
+    while (curNode) {
+      if (curNode->value < target) {
+        curNode = curNode->right;
+      } else {
+        res = curNode;
+        curNode = curNode->left;
+      }
+    }
+
+    return Iterator(res);
+  }
+
+  Iterator upper_bound(VType target) {
+    std::shared_ptr<Node> curNode = root_;
+    std::shared_ptr<Node> res = nullptr;
+    while (curNode) {
+      if (curNode->value <= target) {
+        curNode = curNode->right;
+      } else {
+        res = curNode;
+        curNode = curNode->left;
+      }
+    }
+
+    return Iterator(res);
+  }
+
+  // TODO: Improve in terms of absence of elements in the tree the following
+  // function;
+  //       Use separate non-method function for this functionality;
+  size_t getRangeQuerieCount(int first, int second) {
+    if (first > second)
+      std::swap(first, second);
+
+    Iterator fi = lower_bound(first);
+    Iterator si = upper_bound(second);
+
+    // TODO: Improve Iterator to use std::distance
+    size_t dist = 0;
+    while (fi != si) {
+      dist++;
+      fi++;
+    }
+
+    return dist;
+  }
+
   void insert(VType newVal) {
     auto newNode = std::make_shared<Node>(newVal, std::weak_ptr<Node>());
     // STEP 1: Inserting as in BST
@@ -271,7 +412,7 @@ private:
     int ldbh = dummyBruteHeight(curNode->left);
     int rdbh = dummyBruteHeight(curNode->right);
 
-    if (ldbh == -1 || rdbh == -1 || abs(ldbh - rdbh) > 1)
+    if (ldbh == -1 || rdbh == -1 || std::abs(ldbh - rdbh) > 1)
       return -1;
 
     return 1 + std::max(ldbh, rdbh);
