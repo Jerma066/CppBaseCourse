@@ -2,12 +2,13 @@
 
 #include <cstdlib>
 #include <memory>
-#include <queue>  // Only for bfs travers
+#include <queue>  // For bfs and lca
 #include <vector> // Only for bfs travers
 
 namespace tree {
 
 // TODO: Add constructor with initializer list
+// TODO: Add delete method
 template <typename VType> class AVL final {
 private:
   // Node description
@@ -26,15 +27,16 @@ private:
     std::shared_ptr<Node> left = nullptr;
     std::shared_ptr<Node> right = nullptr;
     int height = 0;
+    int subTreeSize = 1;
   };
 
-private:
+public:
   class Iterator final {
-    // TODO: Should be bidirectional.
-    //       Support all required methods.
-    using iterator_category = std::forward_iterator_tag;
-    using value_type = VType;
+  public:
+    // TODO: Support all required methods.
+    using iterator_category = std::bidirectional_iterator_tag;
     using difference_type = std::ptrdiff_t;
+    using value_type = VType;
     using pointer = VType *;
     using reference = VType &;
 
@@ -42,6 +44,7 @@ private:
     explicit Iterator(std::shared_ptr<Node> node) : iterableNode(node) {}
 
     std::shared_ptr<Node> operator->() { return iterableNode; }
+    reference operator*() { return iterableNode->value; }
 
     bool operator==(const Iterator &other) const {
       return iterableNode == other.iterableNode;
@@ -51,6 +54,7 @@ private:
       return iterableNode != other.iterableNode;
     }
 
+    // TODO: Check if cycles is required in terms of balanced trees
     Iterator &operator++() {
       if (iterableNode->right != nullptr) {
         iterableNode = iterableNode->right;
@@ -87,6 +91,44 @@ private:
     Iterator operator++(int) {
       Iterator tmp = *this;
       ++(*this);
+      return tmp;
+    }
+
+    // Same as operator++, but symmetrically
+    Iterator operator--() {
+      if (iterableNode->left != nullptr) {
+        iterableNode = iterableNode->left;
+        while (iterableNode->eight != nullptr)
+          iterableNode = iterableNode->right;
+
+        return *this;
+      } else {
+        if (!iterableNode->parent.lock()) {
+          // No left, no parent - return nulltr as iterator
+          iterableNode = iterableNode->parent.lock();
+          return *this;
+        }
+
+        bool isRightChild = iterableNode->parent.lock()->right == iterableNode;
+        if (isRightChild) {
+          iterableNode = iterableNode->parent.lock();
+          return *this;
+        } else {
+          // Node is left child case:
+          iterableNode = iterableNode->parent.lock();
+          while (iterableNode->parent.lock() &&
+                 iterableNode != iterableNode->parent.lock()->right)
+            iterableNode = iterableNode->parent.lock();
+
+          iterableNode = iterableNode->parent.lock();
+          return *this;
+        }
+      }
+    }
+
+    Iterator operator--(int) {
+      Iterator tmp = *this;
+      --(*this);
       return tmp;
     }
 
@@ -147,9 +189,11 @@ public:
     return Iterator(res);
   }
 
-  // TODO: Improve in terms of absence of elements in the tree the following
-  // function;
-  //       Use separate non-method function for this functionality;
+public:
+  size_t size() { return root_->subTreeSize; }
+
+  // TODO: Use separate non-method function for this functionality;
+  // TODO: Implement better algorithm using cub-trees sizes
   size_t getRangeQuerieCount(int first, int second) {
     if (first > second)
       std::swap(first, second);
@@ -157,14 +201,55 @@ public:
     Iterator fi = lower_bound(first);
     Iterator si = upper_bound(second);
 
-    // TODO: Improve Iterator to use std::distance
-    size_t dist = 0;
-    while (fi != si) {
-      dist++;
-      fi++;
+    return std::distance(fi, si);
+  }
+
+  int fastGetRangeQuerieCount(int first, int second) {
+    if (first > second)
+      std::swap(first, second);
+
+    Iterator fi = lower_bound(first);
+    Iterator si = upper_bound(second);
+
+    if (fi == end()) {
+      return 0;
+    } else if (si == end()) {
+      int moreThanFiCnt = fi->right ? fi->right->subTreeSize : 0;
+      // TODO: Develop and use function
+      int fiVal = fi->value;
+      while (fi != end()) {
+        if (fi->value > fiVal) {
+          moreThanFiCnt += fi->right ? fi->right->subTreeSize : 0;
+          moreThanFiCnt += 1;
+        }
+        fi = Iterator(fi->parent.lock());
+      }
+      return moreThanFiCnt + 1;
     }
 
-    return dist;
+    Iterator lca = getLowestCommonAncestor(fi, si);
+    // TODO: Develop and use function
+    int lessThanFiCnt = fi->left ? fi->left->subTreeSize : 0;
+    VType fiVal = fi->value;
+    while (fi != lca) {
+      if (fi->value < fiVal) {
+        lessThanFiCnt += fi->left ? fi->left->subTreeSize : 0;
+        lessThanFiCnt += 1;
+      }
+      fi = Iterator(fi->parent.lock());
+    }
+    // TODO: Develop and use function
+    int moreThanSiCnt = si->right ? si->right->subTreeSize : 0;
+    int siVal = si->value;
+    while (si != lca) {
+      if (si->value > siVal) {
+        moreThanSiCnt += si->right ? si->right->subTreeSize : 0;
+        moreThanSiCnt += 1;
+      }
+      si = Iterator(si->parent.lock());
+    }
+
+    return lca->subTreeSize - 1 - lessThanFiCnt - moreThanSiCnt;
   }
 
   void insert(VType newVal) {
@@ -214,12 +299,14 @@ private:
     return true;
   }
 
+  // TODO: rename, not only height but also sub-tree size
   void upStreamHeightRecalc(std::shared_ptr<Node> startNode) {
     // Recursion cycle
     auto curNode = startNode;
     while (curNode && curNode->parent.lock()) {
       if (curNode->parent.lock()->height == curNode->height) {
         curNode->parent.lock()->height++;
+        curNode->parent.lock()->subTreeSize++;
       } else {
         break;
       }
@@ -335,6 +422,27 @@ private:
         parent->right = rightChild;
       }
     }
+
+    // TODO: Maybe this logic can be iptimized or refactored
+    // Height update of a-node and b-node
+    // First step is a-node
+    int lchProperty = centralNode->left ? centralNode->left->height : -1;
+    int rchProperty = centralNode->right ? centralNode->right->height : -1;
+    centralNode->height = 1 + std::max(lchProperty, rchProperty);
+    // Second step is b-node
+    lchProperty = rightChild->left ? rightChild->left->height : -1;
+    rchProperty = rightChild->right ? rightChild->right->height : -1;
+    rightChild->height = 1 + std::max(lchProperty, rchProperty);
+
+    // Size update of a-node and b-node
+    // First step is a-node
+    lchProperty = centralNode->left ? centralNode->left->subTreeSize : 0;
+    rchProperty = centralNode->right ? centralNode->right->subTreeSize : 0;
+    centralNode->subTreeSize = 1 + lchProperty + rchProperty;
+    // Second step is b-node
+    lchProperty = rightChild->left ? rightChild->left->subTreeSize : 0;
+    rchProperty = rightChild->right ? rightChild->right->subTreeSize : 0;
+    rightChild->subTreeSize = 1 + lchProperty + rchProperty;
   }
 
   void rightRotate(std::shared_ptr<Node> centralNode) {
@@ -368,6 +476,50 @@ private:
         parent->right = leftChild;
       }
     }
+
+    // Height update of a-node and b-node
+    // First step is a-node
+    int leftChildHeight = centralNode->left ? centralNode->left->height : -1;
+    int rightChildHeight = centralNode->right ? centralNode->right->height : -1;
+    centralNode->height = 1 + std::max(leftChildHeight, rightChildHeight);
+    // Second step is b-node
+    leftChildHeight = leftChild->left ? leftChild->left->height : -1;
+    rightChildHeight = leftChild->right ? leftChild->right->height : -1;
+    leftChild->height =  1 + std::max(leftChildHeight, rightChildHeight);
+  }
+
+private:
+  // TOOD: Optimize LCA; 2*O(log(n)) memory usage
+  Iterator getLowestCommonAncestor(Iterator lhs, Iterator rhs) {
+    // Collecting pathes to root
+    std::vector<Iterator> lhsPathToRoot;
+    Iterator rootIter = Iterator(root_);
+    while (lhs != rootIter) {
+      lhsPathToRoot.push_back(lhs);
+      lhs = Iterator(lhs->parent.lock());
+    }
+    lhsPathToRoot.push_back(rootIter);
+
+    std::vector<Iterator> rhsPathToRoot;
+    while (rhs != rootIter) {
+      rhsPathToRoot.push_back(rhs);
+      rhs = Iterator(rhs->parent.lock());
+    }
+    rhsPathToRoot.push_back(rootIter);
+
+    // Obtaining LCA
+    Iterator res(nullptr);
+    while (!lhsPathToRoot.empty() && !rhsPathToRoot.empty()) {
+      if (lhsPathToRoot.back() == rhsPathToRoot.back()) {
+        res = lhsPathToRoot.back();
+        lhsPathToRoot.pop_back();
+        rhsPathToRoot.pop_back();
+      } else {
+        break;
+      }
+    }
+
+    return res;
   }
 
 public:

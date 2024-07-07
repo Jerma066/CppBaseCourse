@@ -297,6 +297,145 @@ TEST(AVLTree, BruteRangeQuerieCount) {
   EXPECT_EQ(avlTree.getRangeQuerieCount(30, 10), 3);
 }
 
+TEST(AVLTree, FastRangeQuerieCount) {
+  tree::AVL<int> avlTree;
+  avlTree.insert(10);
+  avlTree.insert(20);
+  avlTree.insert(30);
+  avlTree.insert(40);
+  avlTree.insert(50);
+
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(29, 41), 2);
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(40, 50), 2);
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(39, 50), 2);
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(41, 50), 1);
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(41, 51), 1);
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(39, 51), 2);
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(40, 41), 1);
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(50, 51), 1);
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(10, 20), 2);
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(20, 30), 2);
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(29, 31), 1);
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(49, 51), 1);
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(9, 11), 1);
+
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(10, 10), 1);
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(20, 20), 1);
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(30, 30), 1);
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(40, 40), 1);
+
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(7, 7), 0);
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(31, 31), 0);
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(101, 101), 0);
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(30, 10), 3);
+
+  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(7, 52), 5);
+}
+
+#include <cstdlib> // for rand()/srand() functions
+#include <ctime>   // for time() function
+// TODO: Unite functions after all teats passed
+TEST(AVLTree, MainMethodCorrectness) {
+  tree::Standard stdTree;
+  tree::AVL<int> avlTree;
+
+  int border = 13824;
+  for (int i = 0; i < border; i++) {
+    stdTree.insertKey(i);
+    avlTree.insert(i);
+  }
+
+  int N = 100;
+  std::vector<int> ranges;
+  srand(static_cast<unsigned int>(time(0)));
+  for (int i = 0; i < N; i++)
+    ranges.push_back(1 + rand() % border);
+
+  for (int i = 0; i < ranges.size() - 2; i++) {
+    int correct = stdTree.getRangeQuerieCount(ranges[i], ranges[i + 1]);
+    EXPECT_EQ(avlTree.getRangeQuerieCount(ranges[i], ranges[i + 1]), correct);
+  }
+}
+
+TEST(AVLTree, FastMethodCorrectness) {
+  tree::Standard stdTree;
+  tree::AVL<int> avlTree;
+
+  int border = 13824;
+  for (int i = 0; i < border; i++) {
+    stdTree.insertKey(i);
+    avlTree.insert(i);
+  }
+
+  int N = 100;
+  std::vector<int> ranges;
+  srand(static_cast<unsigned int>(time(0)));
+  for (int i = 0; i < N; i++)
+    ranges.push_back(1 + rand() % border);
+
+  for (int i = 0; i < ranges.size() - 2; i++) {
+    int correct = stdTree.getRangeQuerieCount(ranges[i], ranges[i + 1]);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(ranges[i], ranges[i + 1]),
+              correct);
+  }
+}
+
+#include <chrono>
+TEST(AVLTree, Perfomance) {
+  tree::Standard stdTree;
+  tree::AVL<int> avlTree;
+
+  int border = 347483;
+  for (int i = 0; i < border; i++) {
+    stdTree.insertKey(i);
+    avlTree.insert(i);
+  }
+
+  int N = 1000;
+  std::vector<int> ranges;
+  srand(static_cast<unsigned int>(time(0)));
+  for (int i = 0; i < N; i++)
+    ranges.push_back(1 + rand() % border);
+
+  {
+    auto start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < ranges.size() - 2; i++)
+      stdTree.getRangeQuerieCount(ranges[i], ranges[i + 1]);
+    auto end = std::chrono::high_resolution_clock::now();
+
+    auto duration =
+        std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    std::cout << "  [STD] Execution time: " << duration.count()
+              << " microseconds." << std::endl;
+  }
+
+  // Slower
+  /*
+        {
+    auto start = std::chrono::high_resolution_clock::now();
+                for (int i = 0; i < ranges.size() - 2; i++)
+                        avlTree.getRangeQuerieCount(ranges[i], ranges[i+1]);
+          auto end = std::chrono::high_resolution_clock::now();
+
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end -
+  start); std::cout << "[AVL] Execution time: " << duration.count() << "
+  microseconds." << std::endl;
+  }
+  */
+
+  {
+    auto start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < ranges.size() - 2; i++)
+      avlTree.fastGetRangeQuerieCount(ranges[i], ranges[i + 1]);
+    auto end = std::chrono::high_resolution_clock::now();
+
+    auto duration =
+        std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    std::cout << "  [AVL] Fast execution time: " << duration.count()
+              << " microseconds." << std::endl;
+  }
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
 
