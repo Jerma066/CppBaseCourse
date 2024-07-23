@@ -22,6 +22,18 @@ private:
       return rh - lh;
     }
 
+    void recalcHeight() {
+      int leftSubTreeHeight = left ? left->height : -1;
+      int rightSubTreeHeight = right ? right->height : -1;
+      height = 1 + std::max(leftSubTreeHeight, rightSubTreeHeight);
+    }
+
+    void recalcSubTreeSize() {
+      int leftStSize = left ? left->subTreeSize : 0;
+      int rightStSize = right ? right->subTreeSize : 0;
+      subTreeSize = 1 + leftStSize + rightStSize;
+    }
+
     VType value;
     std::weak_ptr<Node> parent;
     std::shared_ptr<Node> left = nullptr;
@@ -98,7 +110,7 @@ public:
     Iterator operator--() {
       if (iterableNode->left != nullptr) {
         iterableNode = iterableNode->left;
-        while (iterableNode->eight != nullptr)
+        while (iterableNode->right != nullptr)
           iterableNode = iterableNode->right;
 
         return *this;
@@ -190,7 +202,11 @@ public:
   }
 
 public:
-  size_t size() { return root_->subTreeSize; }
+  size_t size() {
+    if (!root_)
+      return 0;
+    return root_->subTreeSize;
+  }
 
   // TODO: Use separate non-method function for this functionality;
   // TODO: Implement better algorithm using cub-trees sizes
@@ -224,6 +240,7 @@ public:
         }
         fi = Iterator(fi->parent.lock());
       }
+
       return moreThanFiCnt + 1;
     }
 
@@ -238,18 +255,22 @@ public:
       }
       fi = Iterator(fi->parent.lock());
     }
+
     // TODO: Develop and use function
-    int moreThanSiCnt = si->right ? si->right->subTreeSize : 0;
-    int siVal = si->value;
+    int moreThanSiCnt = 0;
+    if (si == lca) {
+      moreThanSiCnt += si->right ? si->right->subTreeSize : 0;
+      moreThanSiCnt += 1;
+    }
     while (si != lca) {
-      if (si->value > siVal) {
+      if (si->value > second) {
         moreThanSiCnt += si->right ? si->right->subTreeSize : 0;
         moreThanSiCnt += 1;
       }
       si = Iterator(si->parent.lock());
     }
 
-    return lca->subTreeSize - 1 - lessThanFiCnt - moreThanSiCnt;
+    return lca->subTreeSize - lessThanFiCnt - moreThanSiCnt;
   }
 
   void insert(VType newVal) {
@@ -257,10 +278,10 @@ public:
     // STEP 1: Inserting as in BST
     bool needRebalancing = insertNode(newNode);
 
-    if (needRebalancing) {
-      // STEP 2: Height calculating
-      upStreamHeightRecalc(newNode);
+    // STEP 2: Height calculating
+    upStreamNodesParametersRecalc(newNode);
 
+    if (needRebalancing) {
       // STEP 3: Tree balancing
       rebalanceTree(newNode->parent.lock());
     }
@@ -299,14 +320,17 @@ private:
     return true;
   }
 
-  // TODO: rename, not only height but also sub-tree size
-  void upStreamHeightRecalc(std::shared_ptr<Node> startNode) {
-    // Recursion cycle
+  void upStreamNodesParametersRecalc(std::shared_ptr<Node> startNode) {
     auto curNode = startNode;
+    while (curNode && curNode->parent.lock()) {
+      curNode->parent.lock()->subTreeSize++;
+      curNode = curNode->parent.lock();
+    }
+
+    curNode = startNode;
     while (curNode && curNode->parent.lock()) {
       if (curNode->parent.lock()->height == curNode->height) {
         curNode->parent.lock()->height++;
-        curNode->parent.lock()->subTreeSize++;
       } else {
         break;
       }
@@ -317,7 +341,6 @@ private:
 
   void rebalanceTree(std::shared_ptr<Node> rotatedNode) {
     // TODO: Check if recursion cycle is required.
-    // TODO: Check if heights should be recalculated.
     // Recursion cycle
     while (rotatedNode) {
       std::shared_ptr<Node> oldParent = rotatedNode->parent.lock();
@@ -423,26 +446,13 @@ private:
       }
     }
 
-    // TODO: Maybe this logic can be iptimized or refactored
-    // Height update of a-node and b-node
-    // First step is a-node
-    int lchProperty = centralNode->left ? centralNode->left->height : -1;
-    int rchProperty = centralNode->right ? centralNode->right->height : -1;
-    centralNode->height = 1 + std::max(lchProperty, rchProperty);
-    // Second step is b-node
-    lchProperty = rightChild->left ? rightChild->left->height : -1;
-    rchProperty = rightChild->right ? rightChild->right->height : -1;
-    rightChild->height = 1 + std::max(lchProperty, rchProperty);
+    // Height update: First step is a-node, second step is b-node
+    centralNode->recalcHeight();
+    rightChild->recalcHeight();
 
-    // Size update of a-node and b-node
-    // First step is a-node
-    lchProperty = centralNode->left ? centralNode->left->subTreeSize : 0;
-    rchProperty = centralNode->right ? centralNode->right->subTreeSize : 0;
-    centralNode->subTreeSize = 1 + lchProperty + rchProperty;
-    // Second step is b-node
-    lchProperty = rightChild->left ? rightChild->left->subTreeSize : 0;
-    rchProperty = rightChild->right ? rightChild->right->subTreeSize : 0;
-    rightChild->subTreeSize = 1 + lchProperty + rchProperty;
+    // Size update: First step is a-node, second step is b-node
+    centralNode->recalcSubTreeSize();
+    rightChild->recalcSubTreeSize();
   }
 
   void rightRotate(std::shared_ptr<Node> centralNode) {
@@ -477,15 +487,11 @@ private:
       }
     }
 
-    // Height update of a-node and b-node
-    // First step is a-node
-    int leftChildHeight = centralNode->left ? centralNode->left->height : -1;
-    int rightChildHeight = centralNode->right ? centralNode->right->height : -1;
-    centralNode->height = 1 + std::max(leftChildHeight, rightChildHeight);
-    // Second step is b-node
-    leftChildHeight = leftChild->left ? leftChild->left->height : -1;
-    rightChildHeight = leftChild->right ? leftChild->right->height : -1;
-    leftChild->height =  1 + std::max(leftChildHeight, rightChildHeight);
+    centralNode->recalcHeight();
+    leftChild->recalcHeight();
+
+    centralNode->recalcSubTreeSize();
+    leftChild->recalcSubTreeSize();
   }
 
 private:
