@@ -297,39 +297,124 @@ TEST(AVLTree, BruteRangeQuerieCount) {
   EXPECT_EQ(avlTree.getRangeQuerieCount(30, 10), 3);
 }
 
-TEST(AVLTree, FastRangeQuerieCount) {
-  tree::AVL<int> avlTree;
-  avlTree.insert(10);
-  avlTree.insert(20);
-  avlTree.insert(30);
-  avlTree.insert(40);
-  avlTree.insert(50);
+TEST(AVLTree, FastRangeQuerieCountCorrectness) {
+  {
+    tree::AVL<int> avlTree;
+    avlTree.insert(10);
+    avlTree.insert(20);
+    avlTree.insert(30);
+    avlTree.insert(40);
+    avlTree.insert(50);
 
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(29, 41), 2);
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(40, 50), 2);
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(39, 50), 2);
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(41, 50), 1);
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(41, 51), 1);
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(39, 51), 2);
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(40, 41), 1);
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(50, 51), 1);
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(10, 20), 2);
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(20, 30), 2);
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(29, 31), 1);
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(49, 51), 1);
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(9, 11), 1);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(29, 41), 2);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(40, 50), 2);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(39, 50), 2);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(41, 50), 1);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(41, 51), 1);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(39, 51), 2);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(40, 41), 1);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(50, 51), 1);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(10, 20), 2);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(20, 30), 2);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(29, 31), 1);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(49, 51), 1);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(9, 11), 1);
 
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(10, 10), 1);
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(20, 20), 1);
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(30, 30), 1);
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(40, 40), 1);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(10, 10), 1);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(20, 20), 1);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(30, 30), 1);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(40, 40), 1);
 
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(7, 7), 0);
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(31, 31), 0);
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(101, 101), 0);
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(30, 10), 3);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(7, 7), 0);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(31, 31), 0);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(101, 101), 0);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(30, 10), 3);
 
-  EXPECT_EQ(avlTree.fastGetRangeQuerieCount(7, 52), 5);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(7, 52), 5);
+  }
+
+  {
+    tree::AVL<int> avlTree;
+    avlTree.insert(0);
+    avlTree.insert(1);
+    avlTree.insert(2);
+    avlTree.insert(3);
+    avlTree.insert(4);
+    avlTree.insert(5);
+    avlTree.insert(6);
+    avlTree.insert(7);
+    avlTree.insert(8);
+    avlTree.insert(9);
+
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(2, 6), 5);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(3, 8), 6);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(3, 7), 5);
+  }
+
+  {
+    tree::AVL<int> avlTree;
+    EXPECT_EQ(avlTree.size(), 0);
+    avlTree.insert(0);
+    EXPECT_EQ(avlTree.size(), 1);
+    avlTree.insert(2);
+    EXPECT_EQ(avlTree.size(), 2);
+    avlTree.insert(4);
+    EXPECT_EQ(avlTree.size(), 3);
+    avlTree.insert(6);
+    EXPECT_EQ(avlTree.size(), 4);
+    avlTree.insert(8);
+    EXPECT_EQ(avlTree.size(), 5);
+
+    avlTree.insert(10);
+    EXPECT_EQ(avlTree.size(), 6);
+    avlTree.insert(12);
+    EXPECT_EQ(avlTree.size(), 7);
+    avlTree.insert(14);
+    EXPECT_EQ(avlTree.size(), 8);
+    avlTree.insert(16);
+    EXPECT_EQ(avlTree.size(), 9);
+    avlTree.insert(18);
+    EXPECT_EQ(avlTree.size(), 10);
+
+    avlTree.insert(20);
+    EXPECT_EQ(avlTree.size(), 11);
+    avlTree.insert(22);
+    EXPECT_EQ(avlTree.size(), 12);
+    avlTree.insert(24);
+    EXPECT_EQ(avlTree.size(), 13);
+    avlTree.insert(26);
+    EXPECT_EQ(avlTree.size(), 14);
+    avlTree.insert(28);
+    EXPECT_EQ(avlTree.size(), 15);
+
+    avlTree.insert(30);
+    EXPECT_EQ(avlTree.size(), 16);
+    avlTree.insert(32);
+    EXPECT_EQ(avlTree.size(), 17);
+    avlTree.insert(34);
+    EXPECT_EQ(avlTree.size(), 18);
+    avlTree.insert(36);
+    EXPECT_EQ(avlTree.size(), 19);
+    avlTree.insert(38);
+    EXPECT_EQ(avlTree.size(), 20);
+
+    avlTree.insert(40);
+    EXPECT_EQ(avlTree.size(), 21);
+    avlTree.insert(42);
+    EXPECT_EQ(avlTree.size(), 22);
+    avlTree.insert(44);
+    EXPECT_EQ(avlTree.size(), 23);
+    avlTree.insert(46);
+    EXPECT_EQ(avlTree.size(), 24);
+    avlTree.insert(48);
+    EXPECT_EQ(avlTree.size(), 25);
+
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(9, 9), 0);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(1, 13), 6);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(7, 27), 10);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(7, 20), 7);
+    EXPECT_EQ(avlTree.fastGetRangeQuerieCount(36, 21), 8);
+  }
 }
 
 #include <cstdlib> // for rand()/srand() functions
@@ -357,7 +442,35 @@ TEST(AVLTree, MainMethodCorrectness) {
   }
 }
 
-TEST(AVLTree, FastMethodCorrectness) {
+TEST(AVLTree, FastMethodSmallCorectness) {
+  tree::Standard stdTree;
+  tree::AVL<int> avlTree;
+
+  int border = 50;
+  int step = 1 + rand() % (border / 5);
+  for (int i = 0; i < border; i += step) {
+    stdTree.insertKey(i);
+    avlTree.insert(i);
+  }
+
+  int N = 10;
+  std::vector<int> ranges;
+  srand(static_cast<unsigned int>(time(0)));
+  for (int i = 0; i < N; i++)
+    ranges.push_back(1 + rand() % border);
+
+  for (int i = 0; i < ranges.size() - 2; i++) {
+    int correct = stdTree.getRangeQuerieCount(ranges[i], ranges[i + 1]);
+    int res = avlTree.fastGetRangeQuerieCount(ranges[i], ranges[i + 1]);
+    if (correct != res)
+      std::cout << "(" << ranges[i] << ", " << ranges[i + 1] << ")"
+                << std::endl;
+
+    EXPECT_EQ(res, correct);
+  }
+}
+
+TEST(AVLTree, FastMethodFullCorrectness) {
   tree::Standard stdTree;
   tree::AVL<int> avlTree;
 
@@ -411,18 +524,18 @@ TEST(AVLTree, Perfomance) {
 
   // Slower
   /*
-        {
+  {
     auto start = std::chrono::high_resolution_clock::now();
-                for (int i = 0; i < ranges.size() - 2; i++)
-                        avlTree.getRangeQuerieCount(ranges[i], ranges[i+1]);
-          auto end = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < ranges.size() - 2; i++)
+      avlTree.getRangeQuerieCount(ranges[i], ranges[i + 1]);
+    auto end = std::chrono::high_resolution_clock::now();
 
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end -
-  start); std::cout << "[AVL] Execution time: " << duration.count() << "
-  microseconds." << std::endl;
+    auto duration =
+        std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    std::cout << "[AVL] Execution time: " << duration.count() << "microseconds."
+              << std::endl;
   }
   */
-
   {
     auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < ranges.size() - 2; i++)
