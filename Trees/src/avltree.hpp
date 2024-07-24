@@ -209,7 +209,6 @@ public:
   }
 
   // TODO: Use separate non-method function for this functionality;
-  // TODO: Implement better algorithm using cub-trees sizes
   size_t getRangeQuerieCount(int first, int second) {
     if (first > second)
       std::swap(first, second);
@@ -220,6 +219,7 @@ public:
     return std::distance(fi, si);
   }
 
+  // TODO: Count of elements shoud be refactored
   int fastGetRangeQuerieCount(int first, int second) {
     if (first > second)
       std::swap(first, second);
@@ -230,8 +230,8 @@ public:
     if (fi == end()) {
       return 0;
     } else if (si == end()) {
-      int moreThanFiCnt = fi->right ? fi->right->subTreeSize : 0;
       // TODO: Develop and use function
+      int moreThanFiCnt = fi->right ? fi->right->subTreeSize : 0;
       int fiVal = fi->value;
       while (fi != end()) {
         if (fi->value > fiVal) {

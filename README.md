@@ -5,4 +5,5 @@ Repository contains implementations of tasks presented in the [C++ programming l
 The following coding exercises were supported:
   1. HWC: [Caches](Caches)
   2. HWT: [Triangles](Triangles)
+  3. HWRQ: [Range Queries](Trees)
   4. HWMX: [Matrices](Matrices)
