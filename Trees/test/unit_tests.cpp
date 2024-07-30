@@ -4,7 +4,7 @@
 #include "stdtree.h"
 
 TEST(StdTree, Correctness) {
-  tree::Standart stdTree;
+  tree::Standard stdTree;
   stdTree.insertKey(10);
   stdTree.insertKey(20);
   stdTree.insertKey(30);

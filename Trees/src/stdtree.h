@@ -6,9 +6,9 @@
 
 namespace tree {
 
-class Standart {
+class Standard {
 public:
-  Standart() = default;
+  Standard() = default;
 
 public:
   void insertKey(int key) { tree.insert(key); }

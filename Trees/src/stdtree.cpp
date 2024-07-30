@@ -1,6 +1,6 @@
 #include "stdtree.h"
 
-size_t tree::Standart::getRangeQuerieCount(int first, int second) {
+size_t tree::Standard::getRangeQuerieCount(int first, int second) {
   if (first > second)
     std::swap(first, second);
 

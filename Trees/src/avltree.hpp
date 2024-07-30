@@ -9,7 +9,8 @@ namespace tree {
 template <typename VType> class AVL final {
 private:
   struct Node final {
-    Node(int val, std::weak_ptr<Node> prnt) : value(val), parent(prnt) {}
+    Node(int value, std::weak_ptr<Node> parent)
+        : value(value), parent(parent) {}
 
     int balanceFactor() {
       int lh = left ? left->height : -1;
@@ -101,16 +102,18 @@ private:
         // left or right-left rotation required
         bool needRightRotate =
             rotatedNode->left && rotatedNode->left->balanceFactor() < 0;
-        if (needRightRotate)
+        if (needRightRotate) {
           rightRotate(rotatedNode->right);
+        }
         leftRotate(rotatedNode);
       } else if (bFactor < -1) {
         // Left sub-tree has greater height
         // right or left-right rotation required
         bool needLeftRotate =
             rotatedNode->right && rotatedNode->right->balanceFactor() > 0;
-        if (needLeftRotate)
+        if (needLeftRotate) {
           leftRotate(rotatedNode->left);
+        }
         rightRotate(rotatedNode);
       }
 
@@ -147,8 +150,9 @@ private:
       return;
 
     // Renewing root_ variable if required
-    if (centralNode == root_)
+    if (centralNode == root_) {
       root_ = rightChild;
+    }
 
     // Binding nodes during rotation:
     /*
@@ -160,8 +164,9 @@ private:
     */
     centralNode->parent = rightChild;
     centralNode->right = rightChild->left;
-    if (rightChild->left)
+    if (rightChild->left) {
       rightChild->left->parent = centralNode;
+    }
 
     // Binding nodes during rotation:
     /*
@@ -183,10 +188,11 @@ private:
        bst              bst
     */
     if (parent) {
-      if (parent->left == centralNode)
+      if (parent->left == centralNode) {
         parent->left = rightChild;
-      else
+      } else {
         parent->right = rightChild;
+      }
     }
   }
 
@@ -201,22 +207,25 @@ private:
     if (!leftChild)
       return;
 
-    if (centralNode == root_)
+    if (centralNode == root_) {
       root_ = leftChild;
+    }
 
     centralNode->parent = leftChild;
     centralNode->left = leftChild->right;
-    if (leftChild->right)
+    if (leftChild->right) {
       leftChild->right->parent = centralNode;
+    }
 
     leftChild->right = centralNode;
     leftChild->parent = parent;
 
     if (parent) {
-      if (parent->left == centralNode)
+      if (parent->left == centralNode) {
         parent->left = leftChild;
-      else
+      } else {
         parent->right = leftChild;
+      }
     }
   }
 
@@ -234,10 +243,12 @@ public:
 
       output.push_back(curNode->value);
 
-      if (curNode->left)
+      if (curNode->left) {
         que.push(curNode->left);
-      if (curNode->right)
+      }
+      if (curNode->right) {
         que.push(curNode->right);
+      }
     }
 
     return output;
