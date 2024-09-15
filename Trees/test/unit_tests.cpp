@@ -1,15 +1,18 @@
 #include <gtest/gtest.h>
 
+#include <cstdlib> // for rand()/srand() functions
+#include <ctime>   // for time() function
+
 #include "avltree.hpp"
 #include "stdtree.h"
 
 TEST(StdTree, Correctness) {
   tree::Standard stdTree;
-  stdTree.insertKey(10);
-  stdTree.insertKey(20);
-  stdTree.insertKey(30);
-  stdTree.insertKey(40);
-  stdTree.insertKey(50);
+  stdTree.insert(10);
+  stdTree.insert(20);
+  stdTree.insert(30);
+  stdTree.insert(40);
+  stdTree.insert(50);
 
   EXPECT_EQ(stdTree.getRangeQuerieCount(29, 41), 2);
   EXPECT_EQ(stdTree.getRangeQuerieCount(40, 50), 2);
@@ -129,6 +132,41 @@ TEST(AVLTree, Rebalance) {
       avlTree.insert(val);
       EXPECT_EQ(avlTree.isBalanced(), true);
     }
+  }
+}
+
+TEST(AVLTree, Iterators) {
+  // operator++ and opearotor--
+  {
+    tree::AVL<int> avlTree;
+    int border = 13824;
+    int N = 100;
+    srand(static_cast<unsigned int>(time(0)));
+    for (int i = 0; i < N; i++)
+      avlTree.insert(1 + rand() % border);
+
+    std::vector<int> sortedElements;
+    sortedElements.reserve(N);
+    auto lastElemIter = avlTree.begin();
+
+    // Testing operator++
+    auto iter = avlTree.begin();
+    auto prevVal = iter->value;
+    ++iter;
+    for (; iter != avlTree.end(); ++iter) {
+      EXPECT_EQ(iter->value > prevVal, true);
+      sortedElements.push_back(prevVal);
+      prevVal = iter->value;
+      lastElemIter = iter;
+    }
+    sortedElements.push_back(lastElemIter->value);
+
+    // Testing operator--
+    for (iter = lastElemIter; iter != avlTree.begin(); iter--) {
+      EXPECT_EQ(iter->value, sortedElements.back());
+      sortedElements.pop_back();
+    }
+    EXPECT_EQ(iter->value, sortedElements.back());
   }
 }
 
@@ -417,16 +455,13 @@ TEST(AVLTree, FastRangeQuerieCountCorrectness) {
   }
 }
 
-#include <cstdlib> // for rand()/srand() functions
-#include <ctime>   // for time() function
-// TODO: Unite functions after all teats passed
 TEST(AVLTree, MainMethodCorrectness) {
   tree::Standard stdTree;
   tree::AVL<int> avlTree;
 
   int border = 13824;
   for (int i = 0; i < border; i++) {
-    stdTree.insertKey(i);
+    stdTree.insert(i);
     avlTree.insert(i);
   }
 
@@ -449,7 +484,7 @@ TEST(AVLTree, FastMethodSmallCorectness) {
   int border = 50;
   int step = 1 + rand() % (border / 5);
   for (int i = 0; i < border; i += step) {
-    stdTree.insertKey(i);
+    stdTree.insert(i);
     avlTree.insert(i);
   }
 
@@ -476,7 +511,7 @@ TEST(AVLTree, FastMethodFullCorrectness) {
 
   int border = 13824;
   for (int i = 0; i < border; i++) {
-    stdTree.insertKey(i);
+    stdTree.insert(i);
     avlTree.insert(i);
   }
 
@@ -494,13 +529,13 @@ TEST(AVLTree, FastMethodFullCorrectness) {
 }
 
 #include <chrono>
-TEST(AVLTree, Perfomance) {
+TEST(AVLTree, Performance) {
   tree::Standard stdTree;
   tree::AVL<int> avlTree;
 
   int border = 347483;
   for (int i = 0; i < border; i++) {
-    stdTree.insertKey(i);
+    stdTree.insert(i);
     avlTree.insert(i);
   }
 
@@ -522,20 +557,6 @@ TEST(AVLTree, Perfomance) {
               << " microseconds." << std::endl;
   }
 
-  // Slower
-  /*
-  {
-    auto start = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < ranges.size() - 2; i++)
-      avlTree.getRangeQuerieCount(ranges[i], ranges[i + 1]);
-    auto end = std::chrono::high_resolution_clock::now();
-
-    auto duration =
-        std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-    std::cout << "[AVL] Execution time: " << duration.count() << "microseconds."
-              << std::endl;
-  }
-  */
   {
     auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < ranges.size() - 2; i++)

@@ -29,7 +29,13 @@
   ```bash
   ./build/main
   ```
-3. To build and launch unit tests use the following comand:
+
+3. To launch the executable for time comparison use:
+  ```bash
+  ./build/time_comparison
+  ```
+
+4. To build and launch unit tests use the following comand:
   ```bash
   cd build
   make unit_tests

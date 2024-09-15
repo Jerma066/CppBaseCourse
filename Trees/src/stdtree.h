@@ -11,7 +11,7 @@ public:
   Standard() = default;
 
 public:
-  void insertKey(int key) { tree.insert(key); }
+  void insert(int key) { tree.insert(key); }
 
   size_t getRangeQuerieCount(int first, int second);
 

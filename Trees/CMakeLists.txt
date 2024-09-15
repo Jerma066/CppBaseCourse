@@ -18,6 +18,7 @@ set(TARGET_SOURCES ./src/stdtree.cpp)
 
 # Define the executable
 add_executable(main main.cpp ${TARGET_SOURCES})
+add_executable(time_comparison time.cpp ${TARGET_SOURCES})
 
 # Unit tests
 enable_testing()

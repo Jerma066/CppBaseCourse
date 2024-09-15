@@ -45,7 +45,6 @@ private:
 public:
   class Iterator final {
   public:
-    // TODO: Support all required methods.
     using iterator_category = std::bidirectional_iterator_tag;
     using difference_type = std::ptrdiff_t;
     using value_type = VType;
@@ -66,38 +65,24 @@ public:
       return iterableNode != other.iterableNode;
     }
 
-    // TODO: Check if cycles is required in terms of balanced trees
     Iterator &operator++() {
+      // Check if the right node is available
       if (iterableNode->right != nullptr) {
         iterableNode = iterableNode->right;
         while (iterableNode->left != nullptr)
           iterableNode = iterableNode->left;
-
-        return *this;
       } else {
-        // TODO: Use one return statement by uniting all if statements
-        //       in one if-elseif-else statement
+        // If iterableNode is the left child - iterate to the parent.
+        // If it is the right child, iterate to the parent's parent (or further)
+        // where it is the left child.
+        while (iterableNode->parent.lock() &&
+               iterableNode == iterableNode->parent.lock()->right)
+          iterableNode = iterableNode->parent.lock();
 
-        if (!iterableNode->parent.lock()) {
-          iterableNode = iterableNode->parent.lock();
-          return *this;
-        }
-
-        bool isLeftChild = iterableNode->parent.lock()->left == iterableNode;
-        if (isLeftChild) {
-          iterableNode = iterableNode->parent.lock();
-          return *this;
-        } else {
-          // Node is right child case:
-          iterableNode = iterableNode->parent.lock();
-          while (iterableNode->parent.lock() &&
-                 iterableNode != iterableNode->parent.lock()->left)
-            iterableNode = iterableNode->parent.lock();
-
-          iterableNode = iterableNode->parent.lock();
-          return *this;
-        }
+        iterableNode = iterableNode->parent.lock();
       }
+
+      return *this;
     }
 
     Iterator operator++(int) {
@@ -112,30 +97,16 @@ public:
         iterableNode = iterableNode->left;
         while (iterableNode->right != nullptr)
           iterableNode = iterableNode->right;
-
-        return *this;
       } else {
-        if (!iterableNode->parent.lock()) {
-          // No left, no parent - return nulltr as iterator
-          iterableNode = iterableNode->parent.lock();
-          return *this;
+        std::shared_ptr<Node> parent = iterableNode->parent.lock();
+        while (parent != nullptr && iterableNode == parent->left) {
+          iterableNode = parent;
+          parent = iterableNode->parent.lock();
         }
-
-        bool isRightChild = iterableNode->parent.lock()->right == iterableNode;
-        if (isRightChild) {
-          iterableNode = iterableNode->parent.lock();
-          return *this;
-        } else {
-          // Node is left child case:
-          iterableNode = iterableNode->parent.lock();
-          while (iterableNode->parent.lock() &&
-                 iterableNode != iterableNode->parent.lock()->right)
-            iterableNode = iterableNode->parent.lock();
-
-          iterableNode = iterableNode->parent.lock();
-          return *this;
-        }
+        iterableNode = parent;
       }
+
+      return *this;
     }
 
     Iterator operator--(int) {
@@ -149,15 +120,7 @@ public:
   };
 
 public:
-  // TODO: Memoization of left-most node is required
-  Iterator begin() {
-    std::shared_ptr<Node> curNode = root_;
-    while (curNode->left)
-      curNode = curNode->left;
-
-    return Iterator(curNode);
-  }
-
+  Iterator begin() { return Iterator(first_); }
   Iterator end() { return Iterator(nullptr); }
 
 public:
@@ -208,7 +171,6 @@ public:
     return root_->subTreeSize;
   }
 
-  // TODO: Use separate non-method function for this functionality;
   size_t getRangeQuerieCount(int first, int second) {
     if (first > second)
       std::swap(first, second);
@@ -219,58 +181,78 @@ public:
     return std::distance(fi, si);
   }
 
-  // TODO: Count of elements shoud be refactored
+private:
+  /**
+   * @brief Counts the number of elements greater than the given element in the
+   * allocated subtree.
+   *
+   * @params curElem - the given element; sbRoot - the root of allocated subtree
+   * @return The number of greater elements in subtree.
+   */
+  int countGreaterElements(Iterator curElem, Iterator sbRoot) {
+    int resCnt = 0;
+    if (curElem == sbRoot)
+      resCnt += curElem->right ? curElem->right->subTreeSize : 0;
+
+    auto mainElemValue = curElem->value;
+    while (curElem != sbRoot) {
+      if (curElem->value >= mainElemValue) {
+        resCnt += curElem->right ? curElem->right->subTreeSize : 0;
+        if (curElem->value > mainElemValue)
+          resCnt += 1;
+      }
+      curElem = Iterator(curElem->parent.lock());
+    }
+
+    return resCnt;
+  }
+
+  // TODO: Maybe it is beter to combine two functions into one
+  // Same as countGreaterElements, but symmetrically
+  int countLessElements(Iterator curElem, Iterator sbRoot) {
+    int resCnt = 0;
+    if (curElem == sbRoot)
+      resCnt += curElem->left ? curElem->left->subTreeSize : 0;
+
+    auto mainElemValue = curElem->value;
+    while (curElem != sbRoot) {
+      if (curElem->value <= mainElemValue) {
+        resCnt += curElem->left ? curElem->left->subTreeSize : 0;
+        if (curElem->value < mainElemValue)
+          resCnt += 1;
+      }
+      curElem = Iterator(curElem->parent.lock());
+    }
+
+    return resCnt;
+  }
+
+public:
   int fastGetRangeQuerieCount(int first, int second) {
     if (first > second)
       std::swap(first, second);
 
     Iterator fi = lower_bound(first);
-    Iterator si = upper_bound(second);
+    Iterator si = lower_bound(second);
 
     if (fi == end()) {
       return 0;
     } else if (si == end()) {
-      // TODO: Develop and use function
-      int moreThanFiCnt = fi->right ? fi->right->subTreeSize : 0;
-      int fiVal = fi->value;
-      while (fi != end()) {
-        if (fi->value > fiVal) {
-          moreThanFiCnt += fi->right ? fi->right->subTreeSize : 0;
-          moreThanFiCnt += 1;
-        }
-        fi = Iterator(fi->parent.lock());
-      }
-
-      return moreThanFiCnt + 1;
+      int greaterThanFiCnt = countGreaterElements(fi, end());
+      return greaterThanFiCnt + 1;
     }
 
     Iterator lca = getLowestCommonAncestor(fi, si);
-    // TODO: Develop and use function
-    int lessThanFiCnt = fi->left ? fi->left->subTreeSize : 0;
-    VType fiVal = fi->value;
-    while (fi != lca) {
-      if (fi->value < fiVal) {
-        lessThanFiCnt += fi->left ? fi->left->subTreeSize : 0;
-        lessThanFiCnt += 1;
-      }
-      fi = Iterator(fi->parent.lock());
-    }
 
-    // TODO: Develop and use function
-    int moreThanSiCnt = 0;
-    if (si == lca) {
-      moreThanSiCnt += si->right ? si->right->subTreeSize : 0;
-      moreThanSiCnt += 1;
-    }
-    while (si != lca) {
-      if (si->value > second) {
-        moreThanSiCnt += si->right ? si->right->subTreeSize : 0;
-        moreThanSiCnt += 1;
-      }
-      si = Iterator(si->parent.lock());
-    }
+    int lessThanFiCnt = countLessElements(fi, lca);
+    if (first > fi->value)
+      lessThanFiCnt += 1;
 
-    return lca->subTreeSize - lessThanFiCnt - moreThanSiCnt;
+    int greaterThanSiCnt = countGreaterElements(si, lca);
+    if (second < si->value)
+      greaterThanSiCnt += 1;
+
+    return lca->subTreeSize - lessThanFiCnt - greaterThanSiCnt;
   }
 
   void insert(VType newVal) {
@@ -284,6 +266,9 @@ public:
     if (needRebalancing) {
       // STEP 3: Tree balancing
       rebalanceTree(newNode->parent.lock());
+
+      // STEP 4: Update lowest elem for begin() method
+      recalcFirstElem();
     }
   }
 
@@ -309,6 +294,7 @@ private:
     if (!newParentNode) {
       // Empty tree case - no rebalancing required
       root_ = newNode;
+      first_ = newNode;
       return false;
     } else if (newNode->value < newParentNode->value) {
       newParentNode->left = newNode;
@@ -340,7 +326,6 @@ private:
   }
 
   void rebalanceTree(std::shared_ptr<Node> rotatedNode) {
-    // TODO: Check if recursion cycle is required.
     // Recursion cycle
     while (rotatedNode) {
       std::shared_ptr<Node> oldParent = rotatedNode->parent.lock();
@@ -494,7 +479,14 @@ private:
     leftChild->recalcSubTreeSize();
   }
 
-private:
+  void recalcFirstElem() {
+    std::shared_ptr<Node> curNode = root_;
+    while (curNode->left)
+      curNode = curNode->left;
+
+    first_ = std::move(curNode);
+  }
+
   // TOOD: Optimize LCA; 2*O(log(n)) memory usage
   Iterator getLowestCommonAncestor(Iterator lhs, Iterator rhs) {
     // Collecting pathes to root
@@ -578,6 +570,7 @@ private:
 
 private:
   std::shared_ptr<Node> root_;
+  std::shared_ptr<Node> first_;
 };
 
 } // namespace tree
