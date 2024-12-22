@@ -1,5 +1,5 @@
-#include "paracl-lexer.h"
+#include "paracl-grammar.h"
 
 int main() {
-  return yylex();
+  return yyparse();
 }
