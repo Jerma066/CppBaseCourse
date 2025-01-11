@@ -1,0 +1,15 @@
+<TOK_IDENT, "fst", 1: 1, 1: 3>
+<TOK_INT, "0", 1: 7, 1: 7>
+<const_token>
+<ident_token '=' expr>
+<assign_expr>
+<single_statement ';'>
+<func_body statement>
+<TOK_IDENT, "snd", 2: 1, 2: 3>
+<TOK_INT, "1", 2: 7, 2: 7>
+<const_token>
+<ident_token '=' expr>
+<assign_expr>
+<single_statement ';'>
+<func_body statement>
+<input>

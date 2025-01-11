@@ -3,8 +3,8 @@
 # The first argument of the script is the name of tesing binary file
 BIN=$1
 
-INPUT_DIR="test/Lexer/input/"
-GOLDEN_DIR="test/Lexer/golden"
+INPUT_DIR="test/input/"
+GOLDEN_DIR="test/golden"
 OUTPUT_DIR="tmp/out/"
 
 # Check that the testing file exists

@@ -11,6 +11,7 @@
 #include <iostream>
 #include <string>
 
+#include "paracl-grammar.h"
 struct Position_t {
   int line;
   int column;
@@ -18,15 +19,20 @@ struct Position_t {
 
 static Position_t CurPos = {1, 1};
 
+static bool GotError = false;
+
+/* Automatic action when during lexeme reading */
+#define YY_USER_ACTION {                              \
+    yylloc.first_line   = CurPos.line;                \
+    yylloc.last_line    = CurPos.line;                \
+    yylloc.first_column = CurPos.column;              \
+    yylloc.last_column  = CurPos.column + yyleng - 1; \
+    CurPos.column += yyleng; }
+
 static void printLexeme(const std::string& tokName) {
   std::cout << tokName << ", \"" << yytext << "\", {" << CurPos.line << ", "
             << CurPos.column - yyleng << "}\n";
 }
-
-static bool GotError = false;
-
-/* Automatic action when during lexeme reading */
-#define YY_USER_ACTION { CurPos.column += yyleng; }
 
 %}
 
@@ -55,11 +61,13 @@ for                     { printLexeme("FOR"); }
 while                   { printLexeme("WHILE"); }
 break                   { printLexeme("BREAK"); }
 continue                { printLexeme("CONTINUE"); }
-print			{ printLexeme("PRINT"); }
-"?"			{ printLexeme("STDIN"); }
+true                    { return TOK_TRUE; }
+false                   { return TOK_FALSE; }
+print			              { printLexeme("PRINT"); }
+"?"			                { printLexeme("STDIN"); }
 
  /* Single Characters */
-[+\-*/><!;,=(){}\[\]]   { printLexeme(yytext); }
+[+\-*/><!;,=(){}\[\]]   { return yytext[0]; }
 
  /* Multi-character operations */
 "&&"                    { printLexeme("LOGIC_AND"); }
@@ -70,12 +78,12 @@ print			{ printLexeme("PRINT"); }
 "<="                    { printLexeme("IS_LEQ"); }
 
  /* Program flow processing */
-\'\\?.\'                { printLexeme("CHAR"); }
-{INTEGER}               { printLexeme("INTEGER"); }
-{IDENTIFIER}            { printLexeme("IDENTIFIER"); }
+\'\\?.\'                { return TOK_CHAR; }
+{INTEGER}               { return TOK_INT; }
+{IDENTIFIER}            { return TOK_IDENT; }
 {SPACE}                 {} /* Ignoring spaces */
 
- /* New line transition (at any state)у */
+ /* New line transition (at any state) */
 <*>\n                   { CurPos.column = 1; CurPos.line += 1;}
 
  /* Illegal characters */

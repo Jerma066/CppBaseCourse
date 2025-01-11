@@ -1,0 +1,33 @@
+<TOK_IDENT, "a", 1: 1, 1: 1>
+<TOK_IDENT, "b", 1: 5, 1: 5>
+<ident_token>
+<TOK_INT, "10", 1: 9, 1: 10>
+<const_token>
+<TOK_IDENT, "c", 1: 14, 1: 14>
+<ident_token>
+<expr '/' expr>
+<expr '+' expr>
+<TOK_INT, "3", 1: 18, 1: 18>
+<const_token>
+<expr '+' expr>
+<ident_token '=' expr>
+<assign_expr>
+<single_statement ';'>
+<func_body statement>
+<TOK_IDENT, "d", 2: 1, 2: 1>
+<TOK_INT, "456", 2: 5, 2: 7>
+<const_token>
+<TOK_IDENT, "f", 2: 11, 2: 11>
+<ident_token>
+<expr '/' expr>
+<TOK_IDENT, "e", 2: 15, 2: 15>
+<ident_token>
+<expr '+' expr>
+<TOK_IDENT, "g", 2: 19, 2: 19>
+<ident_token>
+<expr '+' expr>
+<ident_token '=' expr>
+<assign_expr>
+<single_statement ';'>
+<func_body statement>
+<input>
