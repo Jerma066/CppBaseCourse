@@ -1,0 +1,21 @@
+<TOK_IDENT, "b", 1: 5, 1: 5>
+<ident_token>
+<TOK_IDENT, "a", 2: 3, 2: 3>
+<TOK_IDENT, "b", 2: 7, 2: 7>
+<ident_token>
+<ident_token '=' expr>
+<assign_expr>
+<single_statement ';'>
+<func_body statement>
+<TOK_IF '(' expr ')' '{' func_body '}'>
+<TOK_IDENT, "a", 4: 3, 4: 3>
+<TOK_IDENT, "c", 4: 7, 4: 7>
+<ident_token>
+<ident_token '=' expr>
+<assign_expr>
+<single_statement ';'>
+<func_body statement>
+<if_statement_head TOK_ELSE '{' func_body '}'>
+<if_statement>
+<func_body statement>
+<input>

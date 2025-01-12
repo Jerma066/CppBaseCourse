@@ -1,0 +1,38 @@
+<TOK_IDENT, "a", 1: 5, 1: 5>
+<TOK_INT, "0", 1: 9, 1: 9>
+<const_token>
+<ident_token '=' expr>
+<assign_expr>
+<TOK_IDENT, "a", 1: 12, 1: 12>
+<ident_token>
+<TOK_INT, "10", 1: 17, 1: 18>
+<const_token>
+<expr TOK_IS_NOT_EQ expr>
+<expr>
+<TOK_IDENT, "a", 1: 21, 1: 21>
+<TOK_IDENT, "a", 1: 25, 1: 25>
+<ident_token>
+<TOK_INT, "1", 1: 29, 1: 29>
+<const_token>
+<expr '+' expr>
+<ident_token '=' expr>
+<type_token assign_expr>
+<TOK_IDENT, "a", 2: 7, 2: 7>
+<ident_token>
+<TOK_IDENT, "b", 2: 12, 2: 12>
+<ident_token>
+<expr TOK_IS_EQ expr>
+<TOK_BREAK, "break", 3: 5, 3: 9>
+<single_statement ';'>
+<func_body statement>
+<TOK_IF '(' expr ')' '{' func_body '}'>
+<TOK_CONTINUE, "continue", 5: 5, 5: 12>
+<single_statement ';'>
+<func_body statement>
+<if_statement_head TOK_ELSE '{' func_body '}'>
+<if_statement>
+<func_body statement>
+<TOK_FOR '(' loop_expr_1 ';' loop_expr_2 ';' loop_expr_3 ')' '{' func_body '}'>
+<for_statement>
+<func_body statement>
+<input>

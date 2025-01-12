@@ -51,16 +51,16 @@ NOT_AVIABLE [^a-zA-Z_0-9+\-*/><!;,=(){}\[\]&|'" \n\t]
  /* Processing comments */
 
 "/*"                    { BEGIN(COMMENT); } /* Enable comment analysis state */
-<COMMENT>.              {} 		    /* Nothing to do inside the comment */
+<COMMENT>.              {} 		              /* Nothing to do inside the comment */
 <COMMENT>"*/"           { BEGIN(INITIAL); } /* Return to the initial state */
 
  /* Keywords */
-if                      { printLexeme("IF"); }
-else                    { printLexeme("ELSE"); }
-for                     { printLexeme("FOR"); }
+if                      { return TOK_IF; }
+else                    { return TOK_ELSE; }
+for                     { return TOK_FOR; }
 while                   { printLexeme("WHILE"); }
-break                   { printLexeme("BREAK"); }
-continue                { printLexeme("CONTINUE"); }
+break                   { return TOK_BREAK; }
+continue                { return TOK_CONTINUE; }
 true                    { return TOK_TRUE; }
 false                   { return TOK_FALSE; }
 print			              { printLexeme("PRINT"); }
@@ -72,8 +72,8 @@ print			              { printLexeme("PRINT"); }
  /* Multi-character operations */
 "&&"                    { printLexeme("LOGIC_AND"); }
 "||"                    { printLexeme("LOGIC_OR"); }
-"=="                    { printLexeme("IS_EQ"); }
-"!="                    { printLexeme("IS_NEQ"); }
+"=="                    { return TOK_IS_EQ; }
+"!="                    { return TOK_IS_NOT_EQ; }
 ">="                    { printLexeme("IS_GEQ"); }
 "<="                    { printLexeme("IS_LEQ"); }
 

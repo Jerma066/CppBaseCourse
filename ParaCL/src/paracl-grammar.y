@@ -21,6 +21,8 @@
   static void printNonTerminal(const std::string &tokName);
 %}
 
+%token TOK_IF TOK_ELSE
+%token TOK_FOR TOK_BREAK TOK_CONTINUE
 %token TOK_IDENT
 %token TOK_CHAR TOK_INT TOK_TRUE TOK_FALSE
 
@@ -76,11 +78,49 @@ func_body:
 /* Expressions allowed in the function body */
 statement:
   single_statement ';'  { printNonTerminal("single_statement ';'"); }
+| if_statement          { printNonTerminal("if_statement"); }
+| for_statement         { printNonTerminal("for_statement"); }
 ;
 
 /* Expression ending with ; */
 single_statement:
   assign_expr       { printNonTerminal("assign_expr"); }
+| TOK_BREAK         { printTerminal("TOK_BREAK"); }
+| TOK_CONTINUE      { printTerminal("TOK_CONTINUE"); }
+;
+
+/* Various conditional constructions (if / if-else) */
+if_statement:
+  if_statement_head                             { printNonTerminal("if_statement_head"); }
+| if_statement_head TOK_ELSE '{' func_body '}'  { printNonTerminal("if_statement_head TOK_ELSE '{' func_body '}'"); }
+;
+
+/* General head for any conditional construction */
+if_statement_head:
+  TOK_IF '(' expr ')' '{' func_body '}' { printNonTerminal("TOK_IF '(' expr ')' '{' func_body '}'"); }
+;
+
+/* Cycle construction */
+for_statement:
+  TOK_FOR '(' loop_expr_1 ';' loop_expr_2 ';' loop_expr_3 ')' '{' func_body '}' { printNonTerminal("TOK_FOR '(' loop_expr_1 ';' loop_expr_2 ';' loop_expr_3 ')' '{' func_body '}'"); }
+;
+
+/* Optionally create/assign a variable in the first section of the loop */
+loop_expr_1:
+  assign_expr               { printNonTerminal("assign_expr"); }
+| %empty                    { /* Ничего не пишем */ }
+;
+
+/* Optional expression in the second section of the loop (check expr) */
+loop_expr_2:
+  expr      { printNonTerminal("expr"); }
+| %empty    { /* Ничего не пишем */ }
+;
+
+/* Optional expression in the third section of the loop (working with induction) */
+loop_expr_3:
+  assign_expr   { printNonTerminal("type_token assign_expr"); }
+| %empty        { /* Ничего не пишем */ }
 ;
 
 /* Assignment expression */
