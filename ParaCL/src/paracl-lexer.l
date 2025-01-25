@@ -58,24 +58,24 @@ NOT_AVIABLE [^a-zA-Z_0-9+\-*/><!;,=(){}\[\]&|'" \n\t]
 if                      { return TOK_IF; }
 else                    { return TOK_ELSE; }
 for                     { return TOK_FOR; }
-while                   { printLexeme("WHILE"); }
+while                   { return TOK_WHILE; }
 break                   { return TOK_BREAK; }
 continue                { return TOK_CONTINUE; }
 true                    { return TOK_TRUE; }
 false                   { return TOK_FALSE; }
-print			              { printLexeme("PRINT"); }
-"?"			                { printLexeme("STDIN"); }
+print                   { return TOK_PRINT; }
+"?"                     { return TOK_STDIN; }
 
  /* Single Characters */
 [+\-*/><!;,=(){}\[\]]   { return yytext[0]; }
 
  /* Multi-character operations */
-"&&"                    { printLexeme("LOGIC_AND"); }
-"||"                    { printLexeme("LOGIC_OR"); }
+"&&"                    { return TOK_LOGIC_AND; }
+"||"                    { return TOK_LOGIC_OR; }
 "=="                    { return TOK_IS_EQ; }
 "!="                    { return TOK_IS_NOT_EQ; }
-">="                    { printLexeme("IS_GEQ"); }
-"<="                    { printLexeme("IS_LEQ"); }
+">="                    { TOK_IS_GEQ; }
+"<="                    { TOK_IS_LEQ; }
 
  /* Program flow processing */
 \'\\?.\'                { return TOK_CHAR; }

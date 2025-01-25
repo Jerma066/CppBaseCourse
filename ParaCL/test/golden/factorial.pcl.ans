@@ -1,0 +1,66 @@
+<TOK_IDENT, "input", 1: 1, 1: 5>
+<expr>
+<stdin_expr>
+<single_statement ';'>
+<func_body statement>
+<TOK_IDENT, "input", 3: 5, 3: 9>
+<ident_token>
+<TOK_INT, "10", 3: 13, 3: 14>
+<const_token>
+<expr '<' expr>
+<TOK_INT, "0", 4: 9, 4: 9>
+<const_token>
+<print expr>
+<print_expr>
+<single_statement ';'>
+<func_body statement>
+<TOK_IF '(' expr ')' '{' func_body '}'>
+<if_statement_head>
+<if_statement>
+<func_body statement>
+<TOK_IDENT, "fact", 7: 1, 7: 4>
+<TOK_INT, "1", 7: 8, 7: 8>
+<const_token>
+<ident_token '=' expr>
+<assign_expr>
+<single_statement ';'>
+<func_body statement>
+<TOK_IDENT, "i", 8: 6, 8: 6>
+<TOK_INT, "0", 8: 8, 8: 8>
+<const_token>
+<ident_token '=' expr>
+<assign_expr>
+<TOK_IDENT, "i", 8: 11, 8: 11>
+<ident_token>
+<TOK_IDENT, "input", 8: 15, 8: 19>
+<ident_token>
+<expr '<' expr>
+<expr>
+<TOK_IDENT, "i", 8: 22, 8: 22>
+<TOK_IDENT, "i", 8: 26, 8: 26>
+<ident_token>
+<TOK_INT, "1", 8: 30, 8: 30>
+<const_token>
+<expr '+' expr>
+<ident_token '=' expr>
+<type_token assign_expr>
+<TOK_IDENT, "fact", 9: 3, 9: 6>
+<TOK_IDENT, "fact", 9: 10, 9: 13>
+<ident_token>
+<TOK_IDENT, "i", 9: 17, 9: 17>
+<ident_token>
+<expr '*' expr>
+<ident_token '=' expr>
+<assign_expr>
+<single_statement ';'>
+<func_body statement>
+<TOK_FOR '(' loop_expr_1 ';' loop_expr_2 ';' loop_expr_3 ')' '{' func_body '}'>
+<for_statement>
+<func_body statement>
+<TOK_IDENT, "fact", 12: 7, 12: 10>
+<ident_token>
+<print expr>
+<print_expr>
+<single_statement ';'>
+<func_body statement>
+<input>

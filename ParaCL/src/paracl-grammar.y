@@ -22,9 +22,11 @@
 %}
 
 %token TOK_IF TOK_ELSE
-%token TOK_FOR TOK_BREAK TOK_CONTINUE
+%token TOK_FOR TOK_WHILE TOK_BREAK TOK_CONTINUE
 %token TOK_IDENT
 %token TOK_CHAR TOK_INT TOK_TRUE TOK_FALSE
+
+%token TOK_PRINT TOK_STDIN
 
 /*
  * In addition to the %token directive, the following directives can be used:
@@ -87,6 +89,8 @@ single_statement:
   assign_expr       { printNonTerminal("assign_expr"); }
 | TOK_BREAK         { printTerminal("TOK_BREAK"); }
 | TOK_CONTINUE      { printTerminal("TOK_CONTINUE"); }
+| print_expr        { printNonTerminal("print_expr"); }
+| stdin_expr        { printNonTerminal("stdin_expr"); }
 ;
 
 /* Various conditional constructions (if / if-else) */
@@ -108,24 +112,34 @@ for_statement:
 /* Optionally create/assign a variable in the first section of the loop */
 loop_expr_1:
   assign_expr               { printNonTerminal("assign_expr"); }
-| %empty                    { /* Ничего не пишем */ }
+| %empty                    {}
 ;
 
 /* Optional expression in the second section of the loop (check expr) */
 loop_expr_2:
   expr      { printNonTerminal("expr"); }
-| %empty    { /* Ничего не пишем */ }
+| %empty    {}
 ;
 
 /* Optional expression in the third section of the loop (working with induction) */
 loop_expr_3:
   assign_expr   { printNonTerminal("type_token assign_expr"); }
-| %empty        { /* Ничего не пишем */ }
+| %empty        {}
 ;
 
 /* Assignment expression */
 assign_expr:
   ident_token '=' expr  { printNonTerminal("ident_token '=' expr"); }
+;
+
+/* Print to standart output expression */
+print_expr:
+  TOK_PRINT expr { printNonTerminal("print expr"); }
+;
+
+/* Read from standart input expression */
+stdin_expr:
+  ident_token '=' TOK_STDIN { printNonTerminal("expr"); }
 ;
 
 /* Valid expressions. Only rvalues are allowed here (i.e. direct calculations) */

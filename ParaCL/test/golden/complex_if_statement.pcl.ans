@@ -1,0 +1,78 @@
+<TOK_IDENT, "b1", 1: 1, 1: 2>
+<TOK_INT, "1", 1: 6, 1: 6>
+<const_token>
+<ident_token '=' expr>
+<assign_expr>
+<single_statement ';'>
+<func_body statement>
+<TOK_IDENT, "b2", 2: 1, 2: 2>
+<TOK_INT, "0", 2: 6, 2: 6>
+<const_token>
+<ident_token '=' expr>
+<assign_expr>
+<single_statement ';'>
+<func_body statement>
+<TOK_IDENT, "i", 3: 1, 3: 1>
+<TOK_INT, "10", 3: 5, 3: 6>
+<const_token>
+<ident_token '=' expr>
+<assign_expr>
+<single_statement ';'>
+<func_body statement>
+<TOK_IDENT, "b1", 5: 6, 5: 7>
+<ident_token>
+<TOK_IDENT, "b2", 5: 12, 5: 13>
+<ident_token>
+<expr TOK_LOGIC_OR expr>
+<'(' expr ')'>
+<TOK_IDENT, "b1", 5: 19, 5: 20>
+<ident_token>
+<expr TOK_LOGIC_AND expr>
+<TOK_IDENT, "i", 6: 3, 6: 3>
+<TOK_INT, "100", 6: 10, 6: 12>
+<const_token>
+<TOK_INT, "200", 6: 16, 6: 18>
+<const_token>
+<expr '-' expr>
+<'(' expr ')'>
+<TOK_INT, "100", 6: 23, 6: 25>
+<const_token>
+<expr '+' expr>
+<'(' expr ')'>
+<TOK_INT, "0", 6: 30, 6: 30>
+<const_token>
+<expr '*' expr>
+<'(' expr ')'>
+<TOK_INT, "10", 6: 35, 6: 36>
+<const_token>
+<expr '/' expr>
+<ident_token '=' expr>
+<assign_expr>
+<single_statement ';'>
+<func_body statement>
+<TOK_IF '(' expr ')' '{' func_body '}'>
+<if_statement_head>
+<if_statement>
+<func_body statement>
+<TOK_IDENT, "i", 9: 5, 9: 5>
+<ident_token>
+<TOK_INT, "0", 9: 10, 9: 10>
+<const_token>
+<expr TOK_IS_NOT_EQ expr>
+<TOK_INT, "1", 10: 9, 10: 9>
+<const_token>
+<print expr>
+<print_expr>
+<single_statement ';'>
+<func_body statement>
+<TOK_IF '(' expr ')' '{' func_body '}'>
+<if_statement_head>
+<if_statement>
+<func_body statement>
+<TOK_INT, "0", 13: 7, 13: 7>
+<const_token>
+<print expr>
+<print_expr>
+<single_statement ';'>
+<func_body statement>
+<input>

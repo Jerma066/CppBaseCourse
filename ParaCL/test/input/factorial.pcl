@@ -1,0 +1,12 @@
+input = ?;
+
+if (input < 10) {
+  print 0;
+}
+
+fact = 1;
+for (i=0; i < input; i = i + 1) {
+  fact = fact * i;
+}
+
+print fact;

@@ -1,0 +1,4 @@
+ident = 50;
+if (ident != 10) {
+  ident = 10;
+}
